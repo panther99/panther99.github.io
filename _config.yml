@@ -27,7 +27,8 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
 github_username:  panther99
 permalink: /:year/:month/:day/:title
-include: CNAME
+include:
+  - CNAME
 
 # Build settings
 theme: minima
