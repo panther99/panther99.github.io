@@ -2,7 +2,8 @@
 layout: post
 title:  "Organized Rails application with interactors and utilities"
 date:   2020-01-02 19:08:37 +0200
-categories: ruby rails code-quality
+tags: ruby rails code-quality software-design
+categories: software-development
 ---
 
 If you have ever used Rails, you know that there is no better thing for quick prototyping. It doesn’t matter how easy is your favorite framework for that. Rails will be dozens of times easier, especially giving the fact it is now a mature solution. That’s the biggest reason why so many startups have used it for building their applications.
