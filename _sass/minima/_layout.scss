@@ -235,6 +235,10 @@
       @include media-query($on-laptop) {
         @include relative-font-size(1.75);
       }
+
+      code {
+        font-size: 25px;
+      }
     }
   
     h3 {
