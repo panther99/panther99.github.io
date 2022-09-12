@@ -29,6 +29,8 @@ github_username:  panther99
 permalink: /:year/:month/:day/:title/
 include:
   - CNAME
+disqus:
+  shortname: nikolastojakovic
 
 # Build settings
 theme: minima

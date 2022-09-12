@@ -2,6 +2,7 @@
 layout: post
 title:  "Mental gymnastics with C# – Part I"
 date:   2020-02-02 22:01:33 +0200
+comments: true
 tags: csharp
 categories: coding-challenges
 ---

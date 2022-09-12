@@ -2,6 +2,7 @@
 layout: post
 title:  "5 mistakes I have made as a beginner"
 date:   2020-02-09 15:15:02 +0200
+comments: true
 tags: advices career
 categories: software-development
 ---
