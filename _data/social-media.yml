@@ -1,0 +1,11 @@
+linkedin:
+  id: 'nikolastojakovic'
+  href: 'https://linkedin.com/in'
+  title: 'LinkedIn'
+  icon: 'lni lni-linkedin-original'
+
+github:
+  id: 'panther99'
+  href: 'https://github.com'
+  title: 'GitHub'
+  icon: 'lni lni-github-original'

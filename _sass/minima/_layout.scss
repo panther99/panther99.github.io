@@ -108,6 +108,11 @@
   .site-footer {
     border-top: 1px solid $grey-color-light;
     padding: $spacing-unit 0;
+
+    .social-media a i {
+      font-size: 20px;
+      margin-right: 5px;
+    }
   }
   
   .footer-heading {
@@ -169,8 +174,6 @@
       width:         calc(100% - (#{$spacing-unit} / 2));
     }
   }
-  
-  
   
   /**
    * Page content
