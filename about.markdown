@@ -16,3 +16,22 @@ When I was 16 I met Antonio, a guy from my secondary school. Along with him I st
 These days I mostly write TypeScript and use Node.js, React, Svelte but I also do a bit of Java and Spring. In my spare time I enjoy dabbling in C++ and Rust and exchanging ideas on how to become a better software developer with colleagues. I also love to read, mostly about psychology, philosophy, computer science and politics.
 
 Currently I work at [Inviggo](https://inviggo.com).
+
+## 🌍 Traveling
+
+I'm an avid traveler. I enjoy learning about different cultures, trying exotic food and dabbling in new languages. Here is the list of countries I've visited so far (I'm not counting [ex-YU countries](https://en.wikipedia.org/wiki/Socialist_Federal_Republic_of_Yugoslavia#Legacy)*):
+
+### Europe
+
+* 🇭🇺 Hungary (2017)
+* 🇦🇹 Austria (2017)
+* 🇨🇿 Czechia (2017)
+* 🇸🇰 Slovakia (2017)
+* 🇹🇷 Turkey (2021)
+* 🇸🇪 Sweden (2022)
+
+### Asia
+
+* 🇹🇭 Thailand (2022)
+
+<small>* ex-YU countries share much of the cultural heritage and have pretty much the same language (with some slight differences) so I don't feel like I'm even leaving the country</small>
