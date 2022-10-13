@@ -2,7 +2,6 @@
 layout: post
 title: "Why our software is broken? "
 date: 2020-12-19 14:08:47 +0200
-comments: true
 tags: software-design
 categories: software-development
 ---

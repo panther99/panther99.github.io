@@ -2,7 +2,6 @@
 layout: post
 title:  "Frequent questions about programming answered"
 date:   2020-05-07 15:53:27 +0200
-comments: true
 tags: advices career beginners index
 categories: software-development
 ---

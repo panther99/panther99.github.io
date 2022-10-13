@@ -2,7 +2,6 @@
 layout: post
 title:  "Organized Rails application with interactors and utilities"
 date:   2020-01-02 19:08:37 +0200
-comments: true
 tags: ruby rails code-quality software-design
 categories: software-development
 ---

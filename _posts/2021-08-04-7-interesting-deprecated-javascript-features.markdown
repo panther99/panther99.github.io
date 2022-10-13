@@ -2,7 +2,6 @@
 layout: post
 title: "7 interesting deprecated JavaScript features"
 date: 2021-08-04 17:29:55 +0200
-comments: true
 tags: javascript history web-development
 categories: software-development
 ---
