@@ -9,3 +9,9 @@ github:
   href: 'https://github.com'
   title: 'GitHub'
   icon: 'lni lni-github-original'
+
+dev:
+  id: 'stojakovic99'
+  href: 'https://dev.to'
+  title: 'Dev.to'
+  icon: 'lni lni-dev'
