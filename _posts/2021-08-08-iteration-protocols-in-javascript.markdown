@@ -231,7 +231,7 @@ Output:
 
 Voilà! We made an iterator which is also an iterable.
 
-Fun fact: There is another way to make our iterator iterable by inheriting from [%IteratorPrototype% object](https://tc39.es/ecma262/#sec-%iteratorprototype%-object), however, this way is too cumbersome.
+Fun fact: There is another way to make our iterator iterable by inheriting from [%IteratorPrototype% object](https://tc39.es/ecma262/#sec-%23iteratorprototype%23-object), however, this way is too cumbersome.
 
 Thankfully, there is even easier way to create iterable iterators.
 
