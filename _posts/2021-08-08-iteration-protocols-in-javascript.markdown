@@ -166,7 +166,7 @@ for (const element of iterator) {
 
 And run it...
 
-![typeerror iterator not iterable](/assets/iterator-is-not-iterable.png)
+![typeerror iterator not iterable](/assets/iterator-is-not-iterable.png){: .center-image}
 
 Oops! Looks like we got an error. It says `iterator is not iterable`. What’s going on?
 
