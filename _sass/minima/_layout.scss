@@ -233,6 +233,8 @@
     margin-bottom: $spacing-unit;
   
     h2 {
+      margin-top: 40px;
+
       @include relative-font-size(2);
   
       @include media-query($on-laptop) {
@@ -245,6 +247,8 @@
     }
   
     h3 {
+      margin-top: 40px;
+
       @include relative-font-size(1.625);
   
       @include media-query($on-laptop) {

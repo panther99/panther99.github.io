@@ -8,7 +8,6 @@ categories: software-development
 
 No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?
 
-&nbsp;
 ## Iterables
 
 Each object which implements `@@iterator` method (expressed via `[Symbol.iterator]`) is an *iterable*. It serves as a definition for the behavior which object will have when it’s iterated on (for example with the `for...of` statement). There are built-in iterables like `String`, `Map`, `Set`, `Array`, `TypedArray` and others but you can build your own too.
@@ -85,7 +84,6 @@ d
 
 Fun fact: `Set` and various other iterables accept iterables as an argument. You would be able too see it in the `Set` example above by passing a string or a map. Sometimes there are limitations though – `Map` for example accepts only array-like iterables.
 
-&nbsp;
 ## Iterators
 
 If you take a closer look at the example of the iterable above you’ll see that we return an object with the `next()` method. That object is an *iterator*. Of course, not every object which has the `next()` method is an iterator. Your method needs to return an object which contains at least following two properties; `value` (any JavaScript value) and `done` (boolean). Not doing so would result in a `TypeError` when the method is called. This is called *iterator protocol*.
@@ -126,7 +124,6 @@ plum
 peach
 ```
 
-&nbsp;
 ### Infinite iterators
 
 You don’t need to impose limits on the number of elements in your iterators. Sometimes it’s useful to have infinite iterators which we can use multiple times.
@@ -173,7 +170,6 @@ And run it...
 
 Oops! Looks like we got an error. It says `iterator is not iterable`. What’s going on?
 
-&nbsp;
 ## Differences between iterators and iterables
 
 We saw from the example with the `food` array that iterator was usable both by calling `next()` method and inside `for...of` statement. So, why our iterator doesn’t work like that? Well, it’s because **not every iterator is iterable**.
@@ -235,7 +231,6 @@ Fun fact: There is another way to make our iterator iterable by inheriting from 
 
 Thankfully, there is even easier way to create iterable iterators.
 
-&nbsp;
 ## Generators
 
 ES6 introduced generator functions which are functions returning special kind of iterator – `Generator`. `Generator` adheres to both, iterator and iterable protocol. You’ll recognize them easily by the asterix (*) sign before their name. Let’s see how both, finite and infinite list functions from above would look like when written as generator functions.
@@ -317,7 +312,6 @@ console.log(lilIterator.next().value);
 
 If we didn’t add `return` statement at the end of the generator function, iterator would finish after the third `yield`. And since in our example for infinite list we had `yield` inside `while(true) {}` loop, we ended up with an iterator which returns values infinitely.
 
-&nbsp;
 ## Conclusion
 
 I hope this article helped you to get a better understanding of iteration protocols. There are some stuff I didn’t mention (like using `yield*` for delegating to another generator function) because they wouldn’t add much point for the article. I encourage you to experiment on your own and practice these concepts in your spare time. I showed you some small examples but iterators are much more powerful than that – you’ll see this as you progress in your career (if you haven’t already).

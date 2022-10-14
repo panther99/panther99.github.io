@@ -8,7 +8,6 @@ categories: software-development
 
 Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged.
 
-&nbsp;
 ## `Object.prototype.watch` and `Object.prototype.unwatch` methods
 
 Unce upon a time there was an easy way to watch for the property changes on an object.
@@ -52,7 +51,6 @@ cat.name = "Luna";
 console.log("Hello " + cat.name + "!"); // Hello Luna!
 
 ```
-&nbsp;
 
 ## `with` statement
 
@@ -99,7 +97,7 @@ const cat = {
 const catLocation = cat.details.passport.location;
 catLocation.city = 'Meowyork';
 ```
-&nbsp;
+
 ## Expression closures
 
 Long before arrow functions were even in a plan, there were expression closures. They allowed you to omit curly braces and return statements from the method definitions completely.
@@ -133,7 +131,7 @@ const favorites = {
   get food() { return "Tuna"; }
 };
 ```
-&nbsp;
+
 ## `Object.observe` and `Object.unobserve` methods
 
 Back in the days there was also an easy way of getting an information about any changes to an object.
@@ -179,7 +177,7 @@ cat.name = "Luna";
 cat.name;
 // { type: 'get', target: <obj>, prop: 'name' }
 ```
-&nbsp;
+
 ## `let` expressions and `let` blocks
 
 In ES6, two statements for declaring block-scoped variables have been introduced; `let` and `const`. For the brief period of time, there were non-standard extensions to the let statement. These were `let` expressions and `let` blocks.
@@ -222,7 +220,7 @@ let catAge = 2.5;
 
 console.log(catName + "(" + catAge + " years old)"); // Oswald (2.5 years old)
 ```
-&nbsp;
+
 ## HTML wrapper methods on strings
 
 They are basically bunch of methods which wrapped your string with tags like `bold`, `blink`, `font`, `small`, `big`, `i` etc.
@@ -239,8 +237,6 @@ They are basically bunch of methods which wrapped your string with tags like `bo
 
 There are no alternatives for this monstrosity.
 
-&nbsp;&nbsp;
-
 ## `ParallelArray`
 
 This one was an experimental feature introduced by Mozilla in the Firefox (specifically, version 17 of the Gecko engine). It’s purpose was to enable data-parallelism by executing multiple functions in parallel. If it wasn’t possible, they would be executed in the sequential order.
@@ -255,8 +251,6 @@ cats.map(function(name) {
 **Alternative**
 
 Today you can use `Promise.all` to accomplish this.
-
-&nbsp;
 
 ## Conclusion
 
