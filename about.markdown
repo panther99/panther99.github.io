@@ -28,7 +28,8 @@ I'm an avid traveler. I enjoy learning about different cultures, trying exotic f
 * 🇨🇿 Czechia (2017)
 * 🇸🇰 Slovakia (2017)
 * 🇹🇷 Turkey (2021)
-* 🇸🇪 Sweden (2022)
+* 🇸🇪 Sweden (2022, 2023)
+* 🇩🇰 Denmark (2023)
 
 ### Asia
 
