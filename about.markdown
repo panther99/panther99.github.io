@@ -13,9 +13,7 @@ When I was 16 I met Antonio, a guy from my secondary school. Along with him I st
 * OrganiCity Hackathon in Novi Sad (2018)
 * Metropolitan University Hackathon in Niš (2018)
 
-These days I mostly write TypeScript and use Node.js, React and Svelte but I also do a bit of Java and .NET. In my spare time, beside working on my side projects, I enjoy training, playing games, learning new languages and reading - mostly about psychology, philosophy, computer science and politics.
-
-Currently I work at [Inviggo](https://inviggo.com).
+In my spare time, beside working on my side projects, I enjoy training, playing games, learning new languages and reading - mostly about psychology, philosophy, physics, computer science and politics.
 
 ## 🌍 Traveling
 
