@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Iteration protocols in JavaScript | Nikola Stojaković</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="Iteration protocols in JavaScript" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?" />
+<meta property="og:description" content="No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?" />
+<link rel="canonical" href="https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/" />
+<meta property="og:url" content="https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/" />
+<meta property="og:site_name" content="Nikola Stojaković" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-08-08T16:38:46+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Iteration protocols in JavaScript" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2021-08-08T16:38:46+00:00","datePublished":"2021-08-08T16:38:46+00:00","description":"No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?","headline":"Iteration protocols in JavaScript","mainEntityOfPage":{"@type":"WebPage","@id":"https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/"},"url":"https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet"><link type="application/atom+xml" rel="alternate" href="https://nikolastojakovic.com/feed.xml" title="Nikola Stojaković" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Nikola Stojaković</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About me</a></div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Iteration protocols in JavaScript</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-08-08T16:38:46+00:00" itemprop="datePublished">Aug 8, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?</p>
+
+<h2 id="iterables">Iterables</h2>
+
+<p>Each object which implements <code class="language-plaintext highlighter-rouge">@@iterator</code> method (expressed via <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code>) is an <em>iterable</em>. It serves as a definition for the behavior which object will have when it’s iterated on (for example with the <code class="language-plaintext highlighter-rouge">for...of</code> statement). There are built-in iterables like <code class="language-plaintext highlighter-rouge">String</code>, <code class="language-plaintext highlighter-rouge">Map</code>, <code class="language-plaintext highlighter-rouge">Set</code>, <code class="language-plaintext highlighter-rouge">Array</code>, <code class="language-plaintext highlighter-rouge">TypedArray</code> and others but you can build your own too.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">runningStats</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">Mike</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+  <span class="na">Emma</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+  <span class="na">Billy</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="c1">// creates an iterable which will return custom objects</span>
+<span class="nx">runningStats</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">pairs</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nf">entries</span><span class="p">(</span><span class="nx">runningStats</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="c1">// signal that iterating has been finished</span>
+      <span class="nf">if </span><span class="p">(</span><span class="nx">i</span> <span class="o">===</span> <span class="nx">pairs</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">true</span> <span class="p">};</span>
+      <span class="p">}</span>
+
+      <span class="kd">let</span> <span class="nx">currentPair</span> <span class="o">=</span> <span class="nx">pairs</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span><span class="p">];</span>
+
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="na">value</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="nx">currentPair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="na">kilometers</span><span class="p">:</span> <span class="nx">currentPair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">},</span>
+        <span class="na">done</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">personStats</span> <span class="k">of</span> <span class="nx">runningStats</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">personStats</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Which will give us the following output:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Mike</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">6</span> <span class="p">}</span>
+<span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Emma</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">9</span> <span class="p">}</span>
+<span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Billy</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">11</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Therefore, we can say that iterable is each object which conforms to the <em>iterable protocol</em> described above. You can look at the protocols as some kind of interfaces. And since strings and sets for example are already iterables, you can iterate over them without defining <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> method:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">str</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">word</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">char</span> <span class="k">of</span> <span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">char</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="kd">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">number</span> <span class="k">of</span> <span class="kd">set</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>w
+o
+r
+d
+1
+2
+3
+</code></pre></div></div>
+
+<p>Fun fact: <code class="language-plaintext highlighter-rouge">Set</code> and various other iterables accept iterables as an argument. You would be able too see it in the <code class="language-plaintext highlighter-rouge">Set</code> example above by passing a string or a map. Sometimes there are limitations though – <code class="language-plaintext highlighter-rouge">Map</code> for example accepts only array-like iterables.</p>
+
+<h2 id="iterators">Iterators</h2>
+
+<p>If you take a closer look at the example of the iterable above you’ll see that we return an object with the <code class="language-plaintext highlighter-rouge">next()</code> method. That object is an <em>iterator</em>. Of course, not every object which has the <code class="language-plaintext highlighter-rouge">next()</code> method is an iterator. Your method needs to return an object which contains at least following two properties; <code class="language-plaintext highlighter-rouge">value</code> (any JavaScript value) and <code class="language-plaintext highlighter-rouge">done</code> (boolean). Not doing so would result in a <code class="language-plaintext highlighter-rouge">TypeError</code> when the method is called. This is called <em>iterator protocol</em>.</p>
+
+<p>Let’s see how we can get the iterator from the iterable we made above.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nx">runningStats</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Mike", "kilometers": 6 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Emma", "kilometers": 9 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Billy", "kilometers": 11 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: undefined, done: true }</span>
+
+<span class="c1">// Any subsequent calls of the next() method will return the same result</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: undefined, done: true } </span>
+</code></pre></div></div>
+
+<p>Using iterators directly like this could be useful when we want to skip certain element(s) when looping over an iterable.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">[</span><span class="dl">"</span><span class="s2">carrot</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">apple</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">banana</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">plum</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">peach</span><span class="dl">"</span><span class="p">];</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nx">food</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]();</span>
+<span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span> <span class="c1">// skip the first one</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">fruit</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">fruit</span><span class="p">);</span>
+<span class="p">}</span> 
+</code></pre></div></div>
+
+<p>Which would give us the following output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apple
+banana
+plum
+peach
+</code></pre></div></div>
+
+<h3 id="infinite-iterators">Infinite iterators</h3>
+
+<p>You don’t need to impose limits on the number of elements in your iterators. Sometimes it’s useful to have infinite iterators which we can use multiple times.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">infiniteList</span> <span class="o">=</span> <span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}),</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">_</span> <span class="k">of</span> <span class="k">new</span> <span class="nc">Array</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 106</span>
+</code></pre></div></div>
+
+<p>Okay, so let’s try to use <code class="language-plaintext highlighter-rouge">for...of</code> statement to loop over this iterator – at the end, it’s more elegant, isn’t it?</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">infiniteList</span> <span class="o">=</span> <span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}),</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">element</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And run it…</p>
+
+<p><img src="/assets/iterator-is-not-iterable.png" alt="typeerror iterator not iterable" class="center-image"></p>
+
+<p>Oops! Looks like we got an error. It says <code class="language-plaintext highlighter-rouge">iterator is not iterable</code>. What’s going on?</p>
+
+<h2 id="differences-between-iterators-and-iterables">Differences between iterators and iterables</h2>
+
+<p>We saw from the example with the <code class="language-plaintext highlighter-rouge">food</code> array that iterator was usable both by calling <code class="language-plaintext highlighter-rouge">next()</code> method and inside <code class="language-plaintext highlighter-rouge">for...of</code> statement. So, why our iterator doesn’t work like that? Well, it’s because <strong>not every iterator is iterable</strong>.</p>
+
+<p>Remember that the iterable protocol says that we need <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> method on our object for it to be iterable? The thing is that standard iterators have it and it looks like this:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>So handy, isn’t it? That means we can just add it to our iterator to make it an iterable. Oh, and while we’re at it, let’s change the iterator to be finite to avoid our tab crashing like the Dogecoin in May.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// use non-arrow function syntax so that this won't return value of the outer scope</span>
+<span class="kd">const</span> <span class="nx">finiteList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nf">if </span><span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">true</span> <span class="p">};</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+    <span class="p">},</span>
+    <span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">finiteList</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">element</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</code></pre></div></div>
+
+<p>Voilà! We made an iterator which is also an iterable.</p>
+
+<p>Fun fact: There is another way to make our iterator iterable by inheriting from <a href="https://tc39.es/ecma262/#sec-%23iteratorprototype%23-object" target="_blank" rel="noopener noreferrer">%IteratorPrototype% object</a>, however, this way is too cumbersome.</p>
+
+<p>Thankfully, there is even easier way to create iterable iterators.</p>
+
+<h2 id="generators">Generators</h2>
+
+<p>ES6 introduced generator functions which are functions returning special kind of iterator – <code class="language-plaintext highlighter-rouge">Generator</code>. <code class="language-plaintext highlighter-rouge">Generator</code> adheres to both, iterator and iterable protocol. You’ll recognize them easily by the asterix (*) sign before their name. Let’s see how both, finite and infinite list functions from above would look like when written as generator functions.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span><span class="o">*</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="nf">while </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">infiniteIterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 6</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 7</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 8</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 9</span>
+
+<span class="kd">function</span><span class="o">*</span> <span class="nf">finiteList</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+  <span class="nf">while </span><span class="p">(</span><span class="nx">value</span> <span class="o">&lt;</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">finiteIterator</span> <span class="o">=</span> <span class="nf">finiteList</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+
+<span class="c1">// skip 4 steps</span>
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">_</span> <span class="k">of</span> <span class="k">new</span> <span class="nc">Array</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">finiteIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">num</span> <span class="k">of</span> <span class="nx">finiteIterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Step by step description of what happens;</p>
+
+<ul>
+  <li>Generator function is called, returning a <code class="language-plaintext highlighter-rouge">Generator</code> object</li>
+  <li>Calling <code class="language-plaintext highlighter-rouge">next()</code> method executes it until <code class="language-plaintext highlighter-rouge">yield</code> occurs.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">yield</code> defines a value which will be returned. Once <code class="language-plaintext highlighter-rouge">yield</code> is reached, execution at that point stops and all variable bindings are saved for the future calls.</li>
+  <li>Each subsequent <code class="language-plaintext highlighter-rouge">next()</code> call continues execution from the last reached point.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">return</code> from a generator function says that it’s a final value of the iterator.</li>
+</ul>
+
+<p>Let’s give another, more straightforward example;</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span><span class="o">*</span> <span class="nf">lilIterator</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">lilIterator</span><span class="p">();</span>
+
+<span class="c1">// next() is called, execution is stopped at the first yield which returns 0, value is now 1</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, execution is stopped at the second yield which returns 1, value is now 2</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, execution is stopped at the third yield which returns 2, value is now 3</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, at this point generator function has return which means that iterator will be finished with value 3</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// any subsequent next() calls will return { value: undefined, done: true }, so output here would be undefined</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>If we didn’t add <code class="language-plaintext highlighter-rouge">return</code> statement at the end of the generator function, iterator would finish after the third <code class="language-plaintext highlighter-rouge">yield</code>. And since in our example for infinite list we had <code class="language-plaintext highlighter-rouge">yield</code> inside <code class="language-plaintext highlighter-rouge">while(true) {}</code> loop, we ended up with an iterator which returns values infinitely.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I hope this article helped you to get a better understanding of iteration protocols. There are some stuff I didn’t mention (like using <code class="language-plaintext highlighter-rouge">yield*</code> for delegating to another generator function) because they wouldn’t add much point for the article. I encourage you to experiment on your own and practice these concepts in your spare time. I showed you some small examples but iterators are much more powerful than that – you’ll see this as you progress in your career (if you haven’t already).</p>
+
+<p>Let’s sum up the key points;</p>
+
+<ul>
+  <li>
+<strong>Iterable</strong> is an object which adheres to the <em>iterable protocol</em>, meaning it has a <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> property whose value is a method returning an <strong>iterator</strong>.</li>
+  <li>
+<strong>Iterator</strong> is an object which adheres to the <em>iterator protocol</em>, meaning it has a <code class="language-plaintext highlighter-rouge">next()</code> method which returns an object with at least <code class="language-plaintext highlighter-rouge">value</code> and <code class="language-plaintext highlighter-rouge">done</code> properties.</li>
+  <li>Iterator <strong>can</strong> but <strong>doesn’t have</strong> to be an iterable.</li>
+  <li>We can use generator functions for creating objects adhering to both, iterable and iterator protocol.</li>
+</ul>
+
+  </div>
+<a class="u-url" href="/2021/08/08/iteration-protocols-in-javascript/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <data class="u-url" href="/%20/"></data>
+
+    <div class="wrapper">
+
+        <h2 class="footer-heading">Nikola Stojaković</h2>
+
+        <div class="footer-col-wrapper">
+            <div class="footer-col footer-col-1">
+                <ul class="contact-list">
+                    <li class="p-name">
+                        
+<div class="social-media">
+    
+    
+        
+        
+            <a href="https://linkedin.com/in/nikolastojakovic" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="lni lni-linkedin-original"></i></a>
+        
+    
+        
+        
+            <a href="https://github.com/panther99" title="GitHub" target="_blank" rel="noopener noreferrer"><i class="lni lni-github-original"></i></a>
+        
+    
+        
+        
+            <a href="https://dev.to/stojakovic99" title="Dev.to" target="_blank" rel="noopener noreferrer"><i class="lni lni-dev"></i></a>
+        
+    
+</div>
+
+
+                    </li>
+</ul>
+            </div>
+
+            <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/panther99" target="_blank" rel="noopener noreferrer"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">panther99</span></a></li></ul>
+</div>
+
+            <div class="footer-col footer-col-3">
+                <p>Just another software developer ranting about software (mostly).</p>
+            </div>
+        </div>
+
+    </div>
+
+</footer>
+</body>
+
+</html>

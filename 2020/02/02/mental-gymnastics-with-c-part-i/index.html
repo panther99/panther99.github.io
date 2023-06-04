@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Mental gymnastics with C# – Part I | Nikola Stojaković</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="Mental gymnastics with C# – Part I" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the Daily Challenge series on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills." />
+<meta property="og:description" content="What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the Daily Challenge series on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills." />
+<link rel="canonical" href="https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/" />
+<meta property="og:url" content="https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/" />
+<meta property="og:site_name" content="Nikola Stojaković" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-02-02T20:01:33+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Mental gymnastics with C# – Part I" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2020-02-02T20:01:33+00:00","datePublished":"2020-02-02T20:01:33+00:00","description":"What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the Daily Challenge series on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills.","headline":"Mental gymnastics with C# – Part I","mainEntityOfPage":{"@type":"WebPage","@id":"https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/"},"url":"https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet"><link type="application/atom+xml" rel="alternate" href="https://nikolastojakovic.com/feed.xml" title="Nikola Stojaković" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Nikola Stojaković</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About me</a></div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Mental gymnastics with C# – Part I</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-02-02T20:01:33+00:00" itemprop="datePublished">Feb 2, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the <a href="https://dev.to/thepracticaldev/daily-challenge-1-string-peeler-4nep" target="_blank" rel="noopener noreferrer">Daily Challenge series</a> on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills.</p>
+
+<p>Instead of just throwing solutions for the challenges, I will go through the <em>mental flow</em> for each problem and explain why I wrote what I wrote. In my opinion this is the most important thing behind solving code challenges. It will hopefully be helpful to those who are also solving them. I will also write unit tests for each solution.</p>
+
+<p>The code probably won’t be the most idiomatic C# nor it would be the most performant (even though I will try my best). I truly recommend you to try to solve each challenge on your own first. There is no better way to push limits of your knowledge than to tackle with challenging problems on your own.</p>
+
+<p>Without further ado, let’s get started with the actual challenges, shall we? As you will see, the first part will pretty much be the warm-up.</p>
+
+<h2 id="challenge-1---string-peeler">Challenge #1 - String Peeler</h2>
+
+<blockquote>
+  <p>Your goal is to create a function that removes the first and last letters of a string. Strings with two characters or less are considered invalid. You can choose to have your function return null or simply ignore.</p>
+</blockquote>
+
+<p>There is no much going on here. If the text has less than three characters, we will return <code class="language-plaintext highlighter-rouge">null</code>. In case it doesn’t, we will ensure that our text won’t have surrounding white space characters with <code class="language-plaintext highlighter-rouge">String.Trim</code> and use <code class="language-plaintext highlighter-rouge">String.Substring</code> to leave only the characters we want.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringPeeler</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">RemoveFirstAndLastLetter</span><span class="p">(</span><span class="kt">string</span> <span class="n">text</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">trimmedText</span> <span class="p">=</span> <span class="n">text</span><span class="p">.</span><span class="nf">Trim</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">trimmedText</span><span class="p">.</span><span class="n">Length</span> <span class="p">&lt;</span> <span class="m">3</span>
+            <span class="p">?</span> <span class="k">null</span>
+            <span class="p">:</span> <span class="n">trimmedText</span><span class="p">.</span><span class="nf">Substring</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="n">trimmedText</span><span class="p">.</span><span class="n">Length</span> <span class="p">-</span> <span class="m">2</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">sentence</span> <span class="p">=</span> <span class="s">"I am just playing my best move"</span><span class="p">;</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">Program</span><span class="p">.</span><span class="nf">RemoveFirstAndLastLetter</span><span class="p">(</span><span class="n">sentence</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="challenge-2---string-diamond">Challenge #2 - String Diamond</h2>
+
+<blockquote>
+  <p>The shape that the print method will return should resemble a diamond. A number provided as input will represent the number of asterisks printed on the middle line. The line above and below will be centered and will have two less asterisks than the middle line. This reduction will continue for each line until a line with a single asterisk is printed at the top and bottom of the figure.</p>
+
+  <p>Return <code class="language-plaintext highlighter-rouge">null</code> if input is an even number or a negative number.</p>
+</blockquote>
+
+<p>When I stumble upon a problem which initially seems a bit trickier, I like to observe a sample output and see if I can find any patterns. Sometimes, this may be misleading because not all solutions follow the same patterns. But sometimes, it could be helpful, like you will see in this case.</p>
+
+<p>Observing string diamonds, we can see that they contain only spaces and stars. What I tried to do first is to find some ratio between number of spaces and number of stars on the same line. As you can see for yourself, number of spaces is always even, and number of stars is always odd.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      *           8 spaces, 1 star
+     ***          6 spaces, 3 stars
+    *****         4 spaces, 5 stars
+   *******        2 spaces, 7 stars
+  *********       0 spaces, 9 stars
+   *******        2 spaces, 7 stars
+    *****         4 spaces, 5 stars
+     ***          6 spaces, 3 stars
+      *           8 spaces, 1 star
+
+</code></pre></div></div>
+
+<p>Take a look at numbers - you see how they repeat in a different order once you pass the horizontal center line of the diamond? This is very important because it will allow us to find how many spaces each line has.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">startingPoint</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-</span><span class="n">startingPoint</span><span class="p">;</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheLeftSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheRightSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>As we can’t just move towards zero and move back upwards without changing value of the iterator in the loop itself, we will move past zero and use <code class="language-plaintext highlighter-rouge">Math.Abs</code> to preserve positive numbers. It doesn’t make much sense to know only the total number of spaces; we need number of spaces on left side and number of spaces on the right side of the line.</p>
+
+<p>You probably wonder where did <code class="language-plaintext highlighter-rouge">startingPoint</code> suddenly came from. That’s just a placeholder - we will calculate this value right now. In the example above, <code class="language-plaintext highlighter-rouge">startingPoint</code> will be four, because we have four spaces on the each side. Four is also a number of rows below and above horizontal center line. We will get this number by dividing width of the diamond (which in this case is nine).</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheLeftSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheRightSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">numberOfStars</span> <span class="p">=</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Great! Now we have all the numbers we need to actually draw the string diamond. But how are we going to do that without adding new <code class="language-plaintext highlighter-rouge">for</code> loops for drawing multiple spaces and stars? We will use the particular <code class="language-plaintext highlighter-rouge">System.String</code> constructor overload which will allow us to repeat a character multiple times.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">string</span> <span class="n">spaces</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">' '</span><span class="p">,</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+    <span class="kt">string</span> <span class="n">stars</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">'*'</span><span class="p">,</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we’re able to write the whole solution:</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringDiamond</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">DrawDiamond</span><span class="p">(</span><span class="kt">int</span> <span class="n">width</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">width</span> <span class="p">%</span> <span class="m">2</span> <span class="p">==</span> <span class="m">0</span> <span class="p">||</span> <span class="n">width</span> <span class="p">&lt;</span> <span class="m">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kt">string</span> <span class="n">diamond</span> <span class="p">=</span> <span class="s">""</span><span class="p">;</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+        <span class="p">{</span>
+            <span class="kt">string</span> <span class="n">spaces</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">' '</span><span class="p">,</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+            <span class="kt">string</span> <span class="n">stars</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">'*'</span><span class="p">,</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">));</span>
+            <span class="n">diamond</span> <span class="p">+=</span> <span class="n">spaces</span> <span class="p">+</span> <span class="n">stars</span> <span class="p">+</span> <span class="n">spaces</span> <span class="p">+</span> <span class="s">"\n"</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">diamond</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">asterixDiamond</span> <span class="p">=</span> <span class="n">StringDiamond</span><span class="p">.</span><span class="nf">DrawDiamond</span><span class="p">(</span><span class="m">9</span><span class="p">);</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">asterixDiamond</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="challenge-3---vowel-counter">Challenge #3 - Vowel Counter</h2>
+
+<blockquote>
+  <p>Write a function that returns the number (count) of vowels in a given string. Letters considered as vowels are: a, i, e, o, and u. The function should be able to take all types of characters as input, including lower case letters, upper case letters, symbols, and numbers.</p>
+</blockquote>
+
+<p>The most obvious solution for this challenge would be to have a counter, loop through each character of the given string and increment the counter if character is a vowel. Thankfully, C# has a killer feature called <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/linq/" target="_blank" rel="noopener noreferrer">LINQ</a> (Language Integrated Query), which will make solution even simpler. I’ll present solution to you first and then we’ll discuss what it actually does.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">VowelCounter</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">int</span> <span class="nf">CountVowels</span><span class="p">(</span><span class="kt">string</span> <span class="n">text</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">char</span><span class="p">[]</span> <span class="n">vowels</span> <span class="p">=</span> <span class="p">{</span> <span class="sc">'a'</span><span class="p">,</span> <span class="sc">'e'</span><span class="p">,</span> <span class="sc">'i'</span><span class="p">,</span> <span class="sc">'o'</span><span class="p">,</span> <span class="sc">'u'</span> <span class="p">};</span>
+        <span class="k">return</span> <span class="n">text</span><span class="p">.</span><span class="nf">ToLower</span><span class="p">().</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">vowels</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="n">c</span><span class="p">)).</span><span class="nf">Count</span><span class="p">();</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">vowelCount</span> <span class="p">=</span> <span class="n">VowelCounter</span><span class="p">.</span><span class="nf">CountVowels</span><span class="p">(</span><span class="s">"I made my move. You make yours."</span><span class="p">);</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Vowel count: {0}"</span><span class="p">,</span> <span class="n">vowelCount</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>First, we use <code class="language-plaintext highlighter-rouge">String.ToLower</code> to convert whole string to lowercase letters. After that, we filter out consonants by using <code class="language-plaintext highlighter-rouge">Enumerable.Where</code> method - we provide the array of vowels and check if it contains the current character. When filtering is finished, we use <code class="language-plaintext highlighter-rouge">Enumerable.Count</code> method to get the number of results.</p>
+
+<h2 id="challenge-4---checkbox-balancing">Challenge #4 - Checkbox Balancing</h2>
+
+<blockquote>
+  <p>You are given a small checkbook to balance that is given to you as a string. Sometimes, this checkbook will be cluttered by non-alphanumeric characters.</p>
+
+  <p>The first line shows the original balance. Each other (not blank) line gives information: check number, category, and check amount.</p>
+
+  <p>You need to clean the lines first, keeping only letters, digits, dots, and spaces. Next, return the report as a string. On each line of the report, you have to add the new balance. In the last two lines, return the total expenses and average expense. Round your results to two decimal places.</p>
+
+  <p><strong>Example Checkbook</strong></p>
+
+  <ul>
+    <li>1000.00</li>
+    <li>125 Market 125.45</li>
+    <li>126 Hardware 34.95</li>
+    <li>127 Video 7.45</li>
+    <li>128 Book 14.32</li>
+    <li>129 Gasoline 16.10</li>
+  </ul>
+
+  <p><strong>Example Solution</strong></p>
+
+  <ul>
+    <li>Original_Balance: 1000.00</li>
+    <li>125 Market 125.45 Balance 874.55</li>
+    <li>126 Hardware 34.95 Balance 839.60</li>
+    <li>127 Video 7.45 Balance 832.15</li>
+    <li>128 Book 14.32 Balance 817.83</li>
+    <li>129 Gasoline 16.10 Balance 801.73</li>
+    <li>Total expense 198.27</li>
+    <li>Average expense 39.65</li>
+  </ul>
+
+  <p><strong>Challenge Checkbook</strong></p>
+
+  <ul>
+    <li>1233.00</li>
+    <li>125 Hardware;! 24.8?;</li>
+    <li>123 Flowers 93.5</li>
+    <li>127 Meat 120.90</li>
+    <li>120 Picture 34.00</li>
+    <li>124 Gasoline 11.00</li>
+    <li>123 Photos;! 71.4?;</li>
+    <li>122 Picture 93.5</li>
+    <li>132 Tires;! 19.00,?;</li>
+    <li>129 Stamps 13.6</li>
+    <li>129 Fruits{} 17.6</li>
+    <li>129 Market;! 128.00?;</li>
+    <li>121 Gasoline;! 13.6?;</li>
+  </ul>
+</blockquote>
+
+<p>This was <em>somewhat</em> boring challenge because I spent more time thinking about structure of the code than the problem itself. Anyway, here is the list of things we need to do here:</p>
+
+<ul>
+  <li>Clean the whole text, leaving only letters, numbers, spaces, dots and new lines.</li>
+  <li>Take the line and try to parse it to <code class="language-plaintext highlighter-rouge">double</code>. It should succeed on the first try because the first line should have only the current balance.</li>
+  <li>If the previous step didn’t succeed, try to parse the line and take the check number, the category and the expense.</li>
+  <li>Form a new line with the data we gathered and add it to the string we’re gonna return at the end of the method and save the expense for later calculations.</li>
+  <li>If there are no expenses it means our checkbox had no data (or at least not valid data).</li>
+  <li>Calculate total and average expense and add them to the string which is returned at the end of the method.</li>
+</ul>
+
+<p>Let’s write a method for cleaning up the text first. We’ll use regular expression to keep only allowed characters (I’m pretty sure there is a shorter way to write this).</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="n">regex</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Regex</span><span class="p">(</span><span class="s">@"^[A-Za-z0-9. \n]$"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="n">checkbox</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">regex</span><span class="p">.</span><span class="nf">IsMatch</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="nf">ToString</span><span class="p">())).</span><span class="nf">ToArray</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Next, we will have to parse each checkbox line which has a check number, a category and an expense. For this purpose we will use <a href="https://docs.microsoft.com/en-us/dotnet/csharp/tuples" target="_blank" rel="noopener noreferrer">tuples</a>. We need to ensure that each line which violates this format won’t break our program, so we’ll wrap the parsing process in a <code class="language-plaintext highlighter-rouge">try...catch</code> block.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="p">(</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="kt">string</span> <span class="n">line</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">try</span>
+    <span class="p">{</span>
+        <span class="kt">string</span><span class="p">[]</span> <span class="n">fields</span> <span class="p">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">' '</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">checkNumber</span> <span class="p">=</span> <span class="kt">int</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">0</span><span class="p">]);</span>
+        <span class="kt">string</span> <span class="n">category</span> <span class="p">=</span> <span class="n">fields</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+        <span class="kt">double</span> <span class="n">expense</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">2</span><span class="p">]);</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="n">checkNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="n">expense</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">catch</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="k">null</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Finally, we need to ensure that the line we have parsed is valid:</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">ValidCheckboxLine</span><span class="p">((</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="n">tuple</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="kt">object</span><span class="p">[]</span> <span class="p">{</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span> <span class="p">}</span>
+                <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="k">value</span> <span class="p">=&gt;</span> <span class="k">value</span> <span class="p">==</span> <span class="k">null</span><span class="p">).</span><span class="nf">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we have everything we need to write the solution. We will use <code class="language-plaintext highlighter-rouge">List&lt;double&gt;</code> to store expenses and <code class="language-plaintext highlighter-rouge">Enumerable.Sum</code> and <code class="language-plaintext highlighter-rouge">Enumerable.Average</code> to calculate the total expense and the average expense.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Text.RegularExpressions</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CheckboxBalancer</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">regex</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Regex</span><span class="p">(</span><span class="s">@"^[A-Za-z0-9. \n]$"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="n">checkbox</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">regex</span><span class="p">.</span><span class="nf">IsMatch</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="nf">ToString</span><span class="p">())).</span><span class="nf">ToArray</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="p">(</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="kt">string</span> <span class="n">line</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="kt">string</span><span class="p">[]</span> <span class="n">fields</span> <span class="p">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">' '</span><span class="p">);</span>
+            <span class="kt">int</span> <span class="n">checkNumber</span> <span class="p">=</span> <span class="kt">int</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">0</span><span class="p">]);</span>
+            <span class="kt">string</span> <span class="n">category</span> <span class="p">=</span> <span class="n">fields</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+            <span class="kt">double</span> <span class="n">expense</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">2</span><span class="p">]);</span>
+
+            <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="n">checkNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="n">expense</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="k">null</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">ValidCheckboxLine</span><span class="p">((</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="n">tuple</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="kt">object</span><span class="p">[]</span> <span class="p">{</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span> <span class="p">}</span>
+                    <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="k">value</span> <span class="p">=&gt;</span> <span class="k">value</span> <span class="p">==</span> <span class="k">null</span><span class="p">).</span><span class="nf">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">BalanceCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">double</span> <span class="n">balance</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+        <span class="kt">var</span> <span class="n">expenses</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">double</span><span class="p">&gt;();</span>
+        <span class="kt">string</span> <span class="n">cleanedUpCheckbox</span> <span class="p">=</span> <span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">);</span>
+        <span class="kt">string</span> <span class="n">balancedCheckbox</span> <span class="p">=</span> <span class="s">""</span><span class="p">;</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">line</span> <span class="k">in</span> <span class="n">cleanedUpCheckbox</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">'\n'</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">balance</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+                <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Current balance: {0:F2}\n"</span><span class="p">,</span> <span class="n">balance</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">FormatException</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="kt">var</span> <span class="n">tuple</span> <span class="p">=</span> <span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+                <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+
+                <span class="k">if</span> <span class="p">(!</span><span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">ValidCheckboxLine</span><span class="p">(</span><span class="n">tuple</span><span class="p">))</span>
+                <span class="p">{</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="n">balance</span> <span class="p">-=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">Expense</span><span class="p">;</span>
+                <span class="n">expenses</span><span class="p">.</span><span class="nf">Add</span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="n">Expense</span><span class="p">);</span>
+                <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span>
+                    <span class="s">"{0} {1} {2:F2} Balance {3:F2}\n"</span><span class="p">,</span>
+                    <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">,</span> <span class="n">balance</span>
+                <span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">expenses</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Total expense: {0:F2}\n"</span><span class="p">,</span> <span class="n">expenses</span><span class="p">.</span><span class="nf">Sum</span><span class="p">());</span>
+        <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Average expense: {0:F2}\n"</span><span class="p">,</span> <span class="n">expenses</span><span class="p">.</span><span class="nf">Average</span><span class="p">());</span>
+
+        <span class="k">return</span> <span class="n">balancedCheckbox</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">checkbox</span> <span class="p">=</span> <span class="s">@"1233.00
+125 Hardware;! 24.8?;
+123 Flowers 93.5
+127 Meat 120.90
+120 Picture 34.00
+124 Gasoline 11.00
+123 Photos;! 71.4?;
+122 Picture 93.5
+132 Tires;! 19.00,?;
+129 Stamps 13.6
+129 Fruits{} 17.6
+129 Market;! 128.00?;
+121 Gasoline;! 13.6?;	
+"</span><span class="p">;</span>
+
+        <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">BalanceCheckbox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="unit-tests">Unit tests</h2>
+
+<p>Remember I have said that I will write unit tests for each solution? You can find them on <a href="https://github.com/panther99/CodeChallenges" target="_blank" rel="noopener noreferrer">my GitHub repository</a>, along with the source code for each solution. Feel free to ask me any question or give your suggestion on solution improvement.</p>
+
+  </div>
+<a class="u-url" href="/2020/02/02/mental-gymnastics-with-c-part-i/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <data class="u-url" href="/%20/"></data>
+
+    <div class="wrapper">
+
+        <h2 class="footer-heading">Nikola Stojaković</h2>
+
+        <div class="footer-col-wrapper">
+            <div class="footer-col footer-col-1">
+                <ul class="contact-list">
+                    <li class="p-name">
+                        
+<div class="social-media">
+    
+    
+        
+        
+            <a href="https://linkedin.com/in/nikolastojakovic" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="lni lni-linkedin-original"></i></a>
+        
+    
+        
+        
+            <a href="https://github.com/panther99" title="GitHub" target="_blank" rel="noopener noreferrer"><i class="lni lni-github-original"></i></a>
+        
+    
+        
+        
+            <a href="https://dev.to/stojakovic99" title="Dev.to" target="_blank" rel="noopener noreferrer"><i class="lni lni-dev"></i></a>
+        
+    
+</div>
+
+
+                    </li>
+</ul>
+            </div>
+
+            <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/panther99" target="_blank" rel="noopener noreferrer"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">panther99</span></a></li></ul>
+</div>
+
+            <div class="footer-col footer-col-3">
+                <p>Just another software developer ranting about software (mostly).</p>
+            </div>
+        </div>
+
+    </div>
+
+</footer>
+</body>
+
+</html>

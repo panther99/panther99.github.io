@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>In defense of TypeScript | Nikola Stojaković</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="In defense of TypeScript" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="I know what you may think now. Here we go, yet another article telling us how great TypeScript is. Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (2017, 2018, 2019), we can see that TypeScript was always in the four most loved programming languages." />
+<meta property="og:description" content="I know what you may think now. Here we go, yet another article telling us how great TypeScript is. Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (2017, 2018, 2019), we can see that TypeScript was always in the four most loved programming languages." />
+<link rel="canonical" href="https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/" />
+<meta property="og:url" content="https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/" />
+<meta property="og:site_name" content="Nikola Stojaković" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-18T11:58:52+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="In defense of TypeScript" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2020-04-18T11:58:52+00:00","datePublished":"2020-04-18T11:58:52+00:00","description":"I know what you may think now. Here we go, yet another article telling us how great TypeScript is. Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (2017, 2018, 2019), we can see that TypeScript was always in the four most loved programming languages.","headline":"In defense of TypeScript","mainEntityOfPage":{"@type":"WebPage","@id":"https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/"},"url":"https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet"><link type="application/atom+xml" rel="alternate" href="https://nikolastojakovic.com/feed.xml" title="Nikola Stojaković" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Nikola Stojaković</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About me</a></div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">In defense of TypeScript</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-04-18T11:58:52+00:00" itemprop="datePublished">Apr 18, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>I know what you may think now. <em>Here we go, yet another article telling us how great TypeScript is.</em> Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (<a href="https://insights.stackoverflow.com/survey/2017#most-loved-dreaded-and-wanted" target="_blank" rel="noopener noreferrer">2017</a>, <a href="https://insights.stackoverflow.com/survey/2018#most-loved-dreaded-and-wanted" target="_blank" rel="noopener noreferrer">2018</a>, <a href="https://insights.stackoverflow.com/survey/2019#most-loved-dreaded-and-wanted" target="_blank" rel="noopener noreferrer">2019</a>), we can see that TypeScript was always in the four most loved programming languages.</p>
+
+<p>While it’s true that TypeScript is very popular and loved by developers all around the world, we still see misconceptions about it every day. Look - it’s okay if you find TypeScript off-putting or you just don’t need it. I never had to use Python in my workflow and I don’t like it, but I see why people would use it. So, why do we need to talk about TypeScript?</p>
+
+<h2 id="javascript-ecosystem-has-evolved">JavaScript ecosystem has evolved</h2>
+
+<p>Not so long ago, JavaScript was a little more than language for showing fancy animations on the web. Nowadays, beside being used on the web, JavaScript is used for writing desktop applications (Electron), server-side applications (Node.js) and even for the IoT. Currently, there are over 1 230 000 packages on the NPM (data by <a href="http://www.modulecounts.com/" target="_blank" rel="noopener noreferrer">modulecounts</a>). There are many courses, tutorials and jobs for JavaScript developers out there. All in all, knowing JavaScript today is a huge advantage. This is true even if you don’t plan using it as your primary language.</p>
+
+<p>But things are not so great as they may look at first. We all know about <a href="https://www.google.com/search?q=node_modules+memes&amp;source=lnms&amp;tbm=isch&amp;sa=X&amp;ved=2ahUKEwjIr--l4a7oAhUy_SoKHXHFC1MQ_AUoAXoECAsQAw&amp;biw=1920&amp;bih=897" target="_blank" rel="noopener noreferrer">node_modules jokes</a>. With so much popularity and easiness of learning comes a bad code too. We saw that with PHP. This is not a fault of JavaScript, especially not today. As it’s often the case, it’s about people. Now, there are countless debates whether technology needs to set some limits to prevent the misuse or give it’s users free hands. I won’t open that discussion in this article. I will just try to address some common misconceptions about TypeScript.</p>
+
+<h2 id="misconception-1---typescript-has-no-real-purpose">Misconception #1 - TypeScript has no real purpose</h2>
+
+<p>Who knows how many times I heard this. People asking me why do they need to learn another language which basically boils down to the JavaScript. The truth is - you don’t need to. It’s quite possible to spend the rest of your career without ever touching any TypeScript code. But my question is why would you do such thing? Why not giving a chance to a tool which can help you to write a better software?</p>
+
+<p>TypeScript definitely has it’s purpose and the most important ones are;</p>
+
+<ul>
+  <li>
+<strong>Improving communication on the team</strong> - JSDoc is helpful, but it isn’t that powerful and you need to always check the whole documentation to be sure that information in it is still valid.</li>
+  <li>
+<strong>Helping with refactoring</strong> - trying to change that method to return a different data in JavaScript? Pray it won’t break half of your project where that method was used.</li>
+  <li>
+<strong>Preventing you from making dumb mistakes</strong> - adding numbers and strings, no matter how handy can be sometimes, can cause you a great pain in the long run.</li>
+  <li>
+<strong>Allowing you to scale your project easier</strong> - that JavaScript that scales caption you see on the TypeScript’s site? Yup, it’s true.</li>
+</ul>
+
+<p>Even if TypeScript had no practical purpose, it still wouldn’t be a good reason not to learn it. There are some languages (like Scheme, Haskell or Prolog) which may not get you a job[1] but will definitely expand your horizons and help you to become a better developer. Giving the fact that TypeScript is now used by many companies, there is one more reason to at least try it.</p>
+
+<h2 id="misconception-2---typescript-is-hard">Misconception #2 - TypeScript is hard</h2>
+
+<p>Whether something is hard or not is pretty much subjective. In my opinion, TypeScript won’t be hard to a person with solid knowledge of JavaScript. By solid knowledge, I mean you have few JavaScript application running in the production and you understand core subjects (scopes, closures, event loop, prototypes etc). If that’s the case, learning TypeScript won’t be a problem to you. However, if you didn’t have a chance to work with static typed language before (C#, Java, C++ or similar language), it will take some time to get used to it. Again, this shouldn’t be an issue because of the <em>gradual typing</em>.</p>
+
+<p>Gradual typing allows us to slowly migrate our projects from JavaScript to TypeScript by using <code class="language-plaintext highlighter-rouge">any</code> in places where we’re still not sure about concrete data types. Let’s see it on the practical example. Here is a JavaScript method which will fetch badges of the user with specific username.</p>
+
+<script src="https://gist.github.com/panther99/902a6151844875bf5e7b2ff2da2e6634.js"></script>
+
+<p>Let’s say we chose to slowly migrate our project from JavaScript to TypeScript and we’re turning on <code class="language-plaintext highlighter-rouge">strict</code> setting in our <code class="language-plaintext highlighter-rouge">tsconfig.json</code> like we should do. TypeScript will give us a warning for the method above:</p>
+
+<p><img src="/assets/2020/04/type-error-parameter-implicit-any.png" alt="typeerror parameter implicitly any" class="center-image"></p>
+
+<p>The error above means that we have not explicitly set what type username parameter should have. When type is not set, TypeScript assumes you’d like it’s type to be <code class="language-plaintext highlighter-rouge">any</code> (which basically means it can be anything). Fortunately, strict option prevents us from shooting ourselves in the foot. Why? Because having implicitly set parameters throughout the project is the surest path to a disaster. As our project grows we will forget about these places and we won’t get the benefits of TypeScript’s compiler analysis. Also, it’s pretty obvious by the parameter’s name what data type we would like it to have.</p>
+
+<h2 id="wait-a-second">Wait a second…</h2>
+
+<p>But what about <code class="language-plaintext highlighter-rouge">user</code> and <code class="language-plaintext highlighter-rouge">badges</code>? We certainly don’t want to use them as <code class="language-plaintext highlighter-rouge">number</code>s, <code class="language-plaintext highlighter-rouge">string</code>s or <code class="language-plaintext highlighter-rouge">boolean</code>s but as the objects with their respective properties and methods. For now, we will explicitly define them as <code class="language-plaintext highlighter-rouge">any</code> (even though we’re not required to do so). We will define badges as <code class="language-plaintext highlighter-rouge">any[]</code> as we know it will return array of some data type. We can also do this for parameters where we’re still not sure what data type they will have. Let’s see our refactored method now.</p>
+
+<script src="https://gist.github.com/panther99/376e143d2f255147dc8d4173114645ed.js"></script>
+
+<p>Now you may ask what makes such a difference between setting something as <code class="language-plaintext highlighter-rouge">any</code> or <code class="language-plaintext highlighter-rouge">any[]</code>. Well, it’s certainly better to know that something will be array of some things than some thing (which can be array of some things or who knows what else). But let’s say we want to have a method which will check whether user has any badges:</p>
+
+<script src="https://gist.github.com/panther99/4b579b5bd7f7f8470ad089538d0c625c.js"></script>
+
+<p>As TypeScript knows that <code class="language-plaintext highlighter-rouge">fetchUserBadges</code> method will return <code class="language-plaintext highlighter-rouge">Promise&lt;any[]&gt;</code> (a <code class="language-plaintext highlighter-rouge">Promise</code> which when it’s resolved will return <code class="language-plaintext highlighter-rouge">any[]</code>), it can give us available properties and methods as we’re writing the method:</p>
+
+<p><img src="/assets/2020/04/array-length-property.png" alt="array length property" class="center-image"></p>
+
+<p>I know, I know, this is pretty simple example but that’s the whole point – TypeScript on it’s own is <em>not</em> hard. It just takes time to learn how to use it properly, just like it’s the case with any technology out there. Just because you can hack something quickly in the JavaScript doesn’t make it easy. You will still have to learn it’s core concepts in the hard way, by making mistakes and learning from them.</p>
+
+<h2 id="misconception-3--typescript-slows-you-down-too-much">Misconception #3 – TypeScript slows you down too much</h2>
+
+<p>There is something people don’t quite understand when they compare dynamic typed languages with static / strong typed ones. If you ever followed any programming memes page (please don’t if you care about your health), you have probably noticed some image with comparison of Hello world program in Java (C#, C++ or any other static typed language) and in the Python. People who make images like this would like to prove to us how superior Python is. Sadly, they just ruin Python’s image with such lack of understanding some basic things.</p>
+
+<p>Obviously, writing down types does make you slower than not writing them. But that initial work will make you faster in the long run. This means that:</p>
+
+<ul>
+  <li>Debugging will be easier once your project grows</li>
+  <li>Navigating code base will be quicker</li>
+  <li>You will catch many bugs before the runtime</li>
+  <li>Your code will basically document itself (but this doesn’t mean you don’t have to write documentation)</li>
+</ul>
+
+<p>Now, of course, this doesn’t mean you should use TypeScript for every project. Recently I built a simple weather application in TypeScript (I used TypeScript on both, front-end and the back-end) and I wished I did it in JavaScript. But it’s because I only had three routes and three different views on the front-end. TypeScript didn’t help me much there. This is not a fault of TypeScript. It would have many benefits if I chose to extend my application with various services. And / or more complex state management on the front-end.</p>
+
+<h2 id="misconception-4--typescript-was-made-by-microsoft-therefore-it-cant-be-good">Misconception #4 – TypeScript was made by Microsoft, therefore it can’t be good</h2>
+
+<p>Many of us probably know about Microsoft’s dark history. But as someone who hated Microsoft with passion (and still don’t have any sympathies towards it), I can say that Microsoft really changed since Satya Nadella took the position of the CEO, at least with their stance towards open source software. If I can list three great things that Microsoft gave us they would be these ones (in no particular order):</p>
+
+<ul>
+  <li>
+<strong>C#</strong> - modern language with great support for building safe and robust desktop, server-side and even mobile applications</li>
+  <li>
+<strong>Visual Studio Code</strong> - probably the best open source code editor on the market today with hundreds of thousands extensions and constant improvements in each version (built with TypeScript)</li>
+  <li>
+<strong>TypeScript</strong> - do I need to say more?</li>
+</ul>
+
+<p>Saying that TypeScript is bad because it was made by Microsoft is childish at best. We may not like Microsoft’s business strategy but we need to remember that there are thousand of workers in the Microsoft who do their best to build amazing products and TypeScript is definitely one of them.</p>
+
+<h2 id="misconception-5--typescript-is-hard-to-read">Misconception #5 – TypeScript is hard to read</h2>
+
+<p>Another variation of the misconception #2. When people say that TypeScript is hard to read, they often mean that projects they’re trying to contribute to or libraries they’re using are hard to read. This is understandable, considering how complex types can become in a TypeScript codebase.</p>
+
+<p>But guess what? TypeScript is not harder to read than any other strong typed language. It’s about inherent complexity of the project you’re trying to dive in and if you ever worked on production-level apps you know they can grow very quickly. Even in smaller applications type definitions could be long and tedious to read. I remember when I wanted to add types to the <code class="language-plaintext highlighter-rouge">Object.entries</code> method. I ended up writing something like this:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">typedObjectEntries</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">entries</span> <span class="nf">as </span><span class="p">(</span>
+    <span class="nx">o</span><span class="p">:</span> <span class="nx">T</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">=&gt;</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="p">[</span><span class="nb">Extract</span><span class="o">&lt;</span><span class="kr">keyof</span> <span class="nx">T</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="nx">T</span><span class="p">[</span><span class="kr">keyof</span> <span class="nx">T</span><span class="p">]]</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>And I ended up calling it whenever I was using <code class="language-plaintext highlighter-rouge">Object.entries</code> in the project (and this was before I knew I should import <code class="language-plaintext highlighter-rouge">es2017</code>). I know what it does, it’s well named and there is no reason to make it simpler just because someone will spend a bit more time reading it. If it’s not so obvious what the method does, you can always add documentation for it. Writing unreadable code is bad, but simplifying code where you shouldn’t could be much worse. Einstein has famously said:</p>
+
+<blockquote>
+  <p>Everything should be made as simple as possible, but not simpler than that.</p>
+</blockquote>
+
+<p>So, when the code looks hard to read, ask yourself a question. Is it possible for me to simplify this without affecting it’s intent? Would simplifying this code bring any benefits or it can lead to bigger confusion? Don’t think about problems like these through the prism of the programming language. Always try to solve a problem by applying general solutions, and later customize it to follow idioms of the language.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As it’s often the case, this article sums up my experiences of working with TypeScript and in no way tries to pose as a list of empirical facts. I hope it will at least help some people to reconsider their decision to reject using TypeScript in their workflow. Some will disagree with the opinions I expressed here for sure. And that’s okay. I may be biased as an advocate of static typed languages, but I would really like to hear your opinions. I also hope this won’t cause another heated debate. The goal of this article is to question the most common misconceptions about TypeScript, not to bash JavaScript (which, at the end, TypeScript <em>is</em> mostly).</p>
+
+<p>[1] This doesn’t mean you can’t find jobs for Haskell or Prolog developers. I think Scheme is used pretty much only on the university, but Clojure is a variant of Lisp which is used more for commercial projects.</p>
+
+  </div>
+<a class="u-url" href="/2020/04/18/in-defense-of-typescript/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <data class="u-url" href="/%20/"></data>
+
+    <div class="wrapper">
+
+        <h2 class="footer-heading">Nikola Stojaković</h2>
+
+        <div class="footer-col-wrapper">
+            <div class="footer-col footer-col-1">
+                <ul class="contact-list">
+                    <li class="p-name">
+                        
+<div class="social-media">
+    
+    
+        
+        
+            <a href="https://linkedin.com/in/nikolastojakovic" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="lni lni-linkedin-original"></i></a>
+        
+    
+        
+        
+            <a href="https://github.com/panther99" title="GitHub" target="_blank" rel="noopener noreferrer"><i class="lni lni-github-original"></i></a>
+        
+    
+        
+        
+            <a href="https://dev.to/stojakovic99" title="Dev.to" target="_blank" rel="noopener noreferrer"><i class="lni lni-dev"></i></a>
+        
+    
+</div>
+
+
+                    </li>
+</ul>
+            </div>
+
+            <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/panther99" target="_blank" rel="noopener noreferrer"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">panther99</span></a></li></ul>
+</div>
+
+            <div class="footer-col footer-col-3">
+                <p>Just another software developer ranting about software (mostly).</p>
+            </div>
+        </div>
+
+    </div>
+
+</footer>
+</body>
+
+</html>

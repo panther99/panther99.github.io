@@ -1,0 +1,1507 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://nikolastojakovic.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://nikolastojakovic.com/" rel="alternate" type="text/html" /><updated>2023-06-04T18:08:20+00:00</updated><id>https://nikolastojakovic.com/feed.xml</id><title type="html">Nikola Stojaković</title><subtitle>Just another software developer ranting about software (mostly).</subtitle><entry><title type="html">Automate boring tasks with scripts in a Node project</title><link href="https://nikolastojakovic.com/2023/06/04/automate-boring-tasks-with-scripts-in-a-node-project/" rel="alternate" type="text/html" title="Automate boring tasks with scripts in a Node project" /><published>2023-06-04T17:22:00+00:00</published><updated>2023-06-04T17:22:00+00:00</updated><id>https://nikolastojakovic.com/2023/06/04/automate-boring-tasks-with-scripts-in-a-node-project</id><content type="html" xml:base="https://nikolastojakovic.com/2023/06/04/automate-boring-tasks-with-scripts-in-a-node-project/"><![CDATA[<p>One of many things I like about <a href="https://rubyonrails.org/">Rails</a> is it’s CLI. Scaffolding, generating migrations, creating various types of resources for the application and other stuff is so neat and it’s no wonder many frameworks copied it shamelessly.</p>
+
+<p>Once project grows beyond certain point, doing routine tasks becomes tedious. When this happens, I write scripts to automate various jobs. It really helps in maintaining productivity and focusing on important stuff.</p>
+
+<p>Here is a quick way how to do this on any Node project if your framework of choice doesn’t already provide some way to write custom commands for the CLI. After we’re finished you would be able to do something like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run script generate migration &lt;migration_name&gt;
+</code></pre></div></div>
+
+<ol>
+  <li>
+    <p>Create shell script which will serve as an entry point. I typically put it in <code class="language-plaintext highlighter-rouge">src/scripts</code> along with the modules of the scripts I’m going to create. Let’s call it <code class="language-plaintext highlighter-rouge">entry.sh</code>. Don’t forget to allow execution of this script with <code class="language-plaintext highlighter-rouge">chmod</code>.</p>
+
+    <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/usr/bin/env bash</span>
+/usr/bin/env node <span class="nt">--no-warnings</span> <span class="nt">--experimental-specifier-resolution</span><span class="o">=</span>node ./src/scripts/entry.js <span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>In your <code class="language-plaintext highlighter-rouge">package.json</code> add NPM script which will be used for running our custom scripts.</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"scripts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"script"</span><span class="p">:</span><span class="w"> </span><span class="s2">"./src/scripts/entry.sh"</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">our</span><span class="w"> </span><span class="err">NPM</span><span class="w"> </span><span class="err">script</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Create <code class="language-plaintext highlighter-rouge">entry.js</code> file which will serve as the processor for arguments we’ll pass.</p>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">createMigration</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./migrationManager</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="c1">// First two arguments are path to the Node executable and path of this file respectively; let's just ditch them</span>
+<span class="kd">const</span> <span class="nx">usefulArguments</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="kd">const</span> <span class="p">[</span><span class="nx">first</span><span class="p">,</span> <span class="nx">second</span><span class="p">,</span> <span class="p">...</span><span class="nx">rest</span><span class="p">]</span> <span class="o">=</span> <span class="nx">usefulArguments</span><span class="p">;</span>
+
+<span class="nf">if </span><span class="p">([</span><span class="dl">'</span><span class="s1">g</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">generate</span><span class="dl">'</span><span class="p">].</span><span class="nf">includes</span><span class="p">(</span><span class="nx">first</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nf">if </span><span class="p">(</span><span class="nx">second</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">migration</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">createMigration</span><span class="p">(...</span><span class="nx">rest</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>I’m keeping things very simple intentionally; once your list of scripts grows you’d probably like to use some arguments parser for better organization and documentation (e.g. <a href="https://www.npmjs.com/package/commander">commander</a>, <a href="https://www.npmjs.com/package/yargs">yargs</a>, <a href="https://www.npmjs.com/package/argparse">argparse</a>…).</p>
+
+<h2 id="support-for-typescript-and-path-aliases">Support for TypeScript and path aliases</h2>
+
+<p>If you’ve been concerned about the <code class="language-plaintext highlighter-rouge">.js</code> extension because your project is using TypeScript don’t worry - there is a way to do this with support for TypeScript <strong>and</strong> <a href="https://www.typescriptlang.org/tsconfig#paths">path aliases</a> (if you’re using them in your project).</p>
+
+<ol>
+  <li>
+    <p>We’ll need to install few development dependencies before we continue with the process.</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install ts-node tsconfig-paths -D
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Create a <code class="language-plaintext highlighter-rouge">scriptsLoader.js</code> file in the root of your project. This will ensure that your scripts written in TypeScript could be executed and that paths using aliases defined in <code class="language-plaintext highlighter-rouge">tsconfig.json</code> will be properly resolved.</p>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">resolve</span> <span class="k">as</span> <span class="nx">resolveTs</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">ts-node/esm</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">tsConfigPaths</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">tsconfig-paths</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">pathToFileURL</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">url</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">absoluteBaseUrl</span><span class="p">,</span> <span class="nx">paths</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">tsConfigPaths</span><span class="p">.</span><span class="nf">loadConfig</span><span class="p">();</span>
+<span class="kd">const</span> <span class="nx">matchPath</span> <span class="o">=</span> <span class="nx">tsConfigPaths</span><span class="p">.</span><span class="nf">createMatchPath</span><span class="p">(</span><span class="nx">absoluteBaseUrl</span><span class="p">,</span> <span class="nx">paths</span><span class="p">);</span>
+
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">resolve</span><span class="p">(</span><span class="nx">specifier</span><span class="p">,</span> <span class="nx">ctx</span><span class="p">,</span> <span class="nx">defaultResolve</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">match</span> <span class="o">=</span> <span class="nf">matchPath</span><span class="p">(</span><span class="nx">specifier</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">match</span>
+    <span class="p">?</span> <span class="nf">resolveTs</span><span class="p">(</span><span class="nf">pathToFileURL</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">match</span><span class="p">}</span><span class="s2">`</span><span class="p">).</span><span class="nx">href</span><span class="p">,</span> <span class="nx">ctx</span><span class="p">,</span> <span class="nx">defaultResolve</span><span class="p">)</span>
+    <span class="p">:</span> <span class="nf">resolveTs</span><span class="p">(</span><span class="nx">specifier</span><span class="p">,</span> <span class="nx">ctx</span><span class="p">,</span> <span class="nx">defaultResolve</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="p">{</span> <span class="nx">load</span><span class="p">,</span> <span class="nx">transformSource</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">ts-node/esm</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Update NPM script so we can pass path to the loader we’ve just made.</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"scripts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"script"</span><span class="p">:</span><span class="w"> </span><span class="s2">"./src/scripts/entry.sh ./scriptsLoader.js"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Update <code class="language-plaintext highlighter-rouge">src/scripts/entry.sh</code> to pass path to the loader.</p>
+
+    <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c">#!/usr/bin/env bash</span>
+
+ <span class="nv">all_args</span><span class="o">=(</span><span class="s2">"</span><span class="nv">$@</span><span class="s2">"</span><span class="o">)</span>
+ <span class="nv">loader_path</span><span class="o">=</span><span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span>
+ <span class="nv">rest_args</span><span class="o">=(</span><span class="s2">"</span><span class="k">${</span><span class="nv">all_args</span><span class="p">[@]</span>:1<span class="k">}</span><span class="s2">"</span><span class="o">)</span>
+
+ /usr/bin/env node <span class="nt">--no-warnings</span> <span class="nt">--experimental-specifier-resolution</span><span class="o">=</span>node <span class="nt">--loader</span> <span class="s2">"</span><span class="nv">$loader_path</span><span class="s2">"</span> ./src/scripts/entry.ts <span class="s2">"</span><span class="k">${</span><span class="nv">rest_args</span><span class="p">[@]</span><span class="k">}</span><span class="s2">"</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>And that’s it!</p>]]></content><author><name></name></author><category term="software-development" /><category term="javascript" /><category term="node.js" /><category term="development-experience" /><category term="automation" /><summary type="html"><![CDATA[One of many things I like about Rails is it’s CLI. Scaffolding, generating migrations, creating various types of resources for the application and other stuff is so neat and it’s no wonder many frameworks copied it shamelessly.]]></summary></entry><entry><title type="html">A new beginning</title><link href="https://nikolastojakovic.com/2022/09/10/a-new-beginning/" rel="alternate" type="text/html" title="A new beginning" /><published>2022-09-10T10:37:00+00:00</published><updated>2022-09-10T10:37:00+00:00</updated><id>https://nikolastojakovic.com/2022/09/10/a-new-beginning</id><content type="html" xml:base="https://nikolastojakovic.com/2022/09/10/a-new-beginning/"><![CDATA[<p>Goodbye WordPress, hello Jekyll!</p>
+
+<p>I’ll probably add my old articles in a month or so.</p>]]></content><author><name></name></author><category term="blog-updates" /><summary type="html"><![CDATA[Goodbye WordPress, hello Jekyll!]]></summary></entry><entry><title type="html">Iteration protocols in JavaScript</title><link href="https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/" rel="alternate" type="text/html" title="Iteration protocols in JavaScript" /><published>2021-08-08T16:38:46+00:00</published><updated>2021-08-08T16:38:46+00:00</updated><id>https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript</id><content type="html" xml:base="https://nikolastojakovic.com/2021/08/08/iteration-protocols-in-javascript/"><![CDATA[<p>No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?</p>
+
+<h2 id="iterables">Iterables</h2>
+
+<p>Each object which implements <code class="language-plaintext highlighter-rouge">@@iterator</code> method (expressed via <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code>) is an <em>iterable</em>. It serves as a definition for the behavior which object will have when it’s iterated on (for example with the <code class="language-plaintext highlighter-rouge">for...of</code> statement). There are built-in iterables like <code class="language-plaintext highlighter-rouge">String</code>, <code class="language-plaintext highlighter-rouge">Map</code>, <code class="language-plaintext highlighter-rouge">Set</code>, <code class="language-plaintext highlighter-rouge">Array</code>, <code class="language-plaintext highlighter-rouge">TypedArray</code> and others but you can build your own too.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">runningStats</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">Mike</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+  <span class="na">Emma</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+  <span class="na">Billy</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="c1">// creates an iterable which will return custom objects</span>
+<span class="nx">runningStats</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">pairs</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nf">entries</span><span class="p">(</span><span class="nx">runningStats</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="c1">// signal that iterating has been finished</span>
+      <span class="nf">if </span><span class="p">(</span><span class="nx">i</span> <span class="o">===</span> <span class="nx">pairs</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">true</span> <span class="p">};</span>
+      <span class="p">}</span>
+
+      <span class="kd">let</span> <span class="nx">currentPair</span> <span class="o">=</span> <span class="nx">pairs</span><span class="p">[</span><span class="nx">i</span><span class="o">++</span><span class="p">];</span>
+
+      <span class="k">return</span> <span class="p">{</span>
+        <span class="na">value</span><span class="p">:</span> <span class="p">{</span> <span class="na">name</span><span class="p">:</span> <span class="nx">currentPair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="na">kilometers</span><span class="p">:</span> <span class="nx">currentPair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">},</span>
+        <span class="na">done</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+      <span class="p">};</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">personStats</span> <span class="k">of</span> <span class="nx">runningStats</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">personStats</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Which will give us the following output:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Mike</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">6</span> <span class="p">}</span>
+<span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Emma</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">9</span> <span class="p">}</span>
+<span class="p">{</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Billy</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">kilometers</span><span class="dl">"</span><span class="p">:</span> <span class="mi">11</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>Therefore, we can say that iterable is each object which conforms to the <em>iterable protocol</em> described above. You can look at the protocols as some kind of interfaces. And since strings and sets for example are already iterables, you can iterate over them without defining <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> method:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">str</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">word</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">char</span> <span class="k">of</span> <span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">char</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="kd">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">number</span> <span class="k">of</span> <span class="kd">set</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>w
+o
+r
+d
+1
+2
+3
+</code></pre></div></div>
+
+<p>Fun fact: <code class="language-plaintext highlighter-rouge">Set</code> and various other iterables accept iterables as an argument. You would be able too see it in the <code class="language-plaintext highlighter-rouge">Set</code> example above by passing a string or a map. Sometimes there are limitations though – <code class="language-plaintext highlighter-rouge">Map</code> for example accepts only array-like iterables.</p>
+
+<h2 id="iterators">Iterators</h2>
+
+<p>If you take a closer look at the example of the iterable above you’ll see that we return an object with the <code class="language-plaintext highlighter-rouge">next()</code> method. That object is an <em>iterator</em>. Of course, not every object which has the <code class="language-plaintext highlighter-rouge">next()</code> method is an iterator. Your method needs to return an object which contains at least following two properties; <code class="language-plaintext highlighter-rouge">value</code> (any JavaScript value) and <code class="language-plaintext highlighter-rouge">done</code> (boolean). Not doing so would result in a <code class="language-plaintext highlighter-rouge">TypeError</code> when the method is called. This is called <em>iterator protocol</em>.</p>
+
+<p>Let’s see how we can get the iterator from the iterable we made above.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nx">runningStats</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Mike", "kilometers": 6 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Emma", "kilometers": 9 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: { "name": "Billy", "kilometers": 11 }, done: false }</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: undefined, done: true }</span>
+
+<span class="c1">// Any subsequent calls of the next() method will return the same result</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">());</span> <span class="c1">// { value: undefined, done: true } </span>
+</code></pre></div></div>
+
+<p>Using iterators directly like this could be useful when we want to skip certain element(s) when looping over an iterable.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">food</span> <span class="o">=</span> <span class="p">[</span><span class="dl">"</span><span class="s2">carrot</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">apple</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">banana</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">plum</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">peach</span><span class="dl">"</span><span class="p">];</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nx">food</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]();</span>
+<span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span> <span class="c1">// skip the first one</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">fruit</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">fruit</span><span class="p">);</span>
+<span class="p">}</span> 
+</code></pre></div></div>
+
+<p>Which would give us the following output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apple
+banana
+plum
+peach
+</code></pre></div></div>
+
+<h3 id="infinite-iterators">Infinite iterators</h3>
+
+<p>You don’t need to impose limits on the number of elements in your iterators. Sometimes it’s useful to have infinite iterators which we can use multiple times.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">infiniteList</span> <span class="o">=</span> <span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}),</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">_</span> <span class="k">of</span> <span class="k">new</span> <span class="nc">Array</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 106</span>
+</code></pre></div></div>
+
+<p>Okay, so let’s try to use <code class="language-plaintext highlighter-rouge">for...of</code> statement to loop over this iterator – at the end, it’s more elegant, isn’t it?</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">infiniteList</span> <span class="o">=</span> <span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}),</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">element</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And run it…</p>
+
+<p><img src="/assets/iterator-is-not-iterable.png" alt="typeerror iterator not iterable" class="center-image" /></p>
+
+<p>Oops! Looks like we got an error. It says <code class="language-plaintext highlighter-rouge">iterator is not iterable</code>. What’s going on?</p>
+
+<h2 id="differences-between-iterators-and-iterables">Differences between iterators and iterables</h2>
+
+<p>We saw from the example with the <code class="language-plaintext highlighter-rouge">food</code> array that iterator was usable both by calling <code class="language-plaintext highlighter-rouge">next()</code> method and inside <code class="language-plaintext highlighter-rouge">for...of</code> statement. So, why our iterator doesn’t work like that? Well, it’s because <strong>not every iterator is iterable</strong>.</p>
+
+<p>Remember that the iterable protocol says that we need <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> method on our object for it to be iterable? The thing is that standard iterators have it and it looks like this:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>So handy, isn’t it? That means we can just add it to our iterator to make it an iterable. Oh, and while we’re at it, let’s change the iterator to be finite to avoid our tab crashing like the Dogecoin in May.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// use non-arrow function syntax so that this won't return value of the outer scope</span>
+<span class="kd">const</span> <span class="nx">finiteList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">next</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nf">if </span><span class="p">(</span><span class="nx">value</span> <span class="o">===</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">true</span> <span class="p">};</span>
+      <span class="p">}</span>
+
+      <span class="k">return</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="nx">value</span><span class="o">++</span><span class="p">,</span> <span class="na">done</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
+    <span class="p">},</span>
+    <span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">finiteList</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">element</span> <span class="k">of</span> <span class="nx">iterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</code></pre></div></div>
+
+<p>Voilà! We made an iterator which is also an iterable.</p>
+
+<p>Fun fact: There is another way to make our iterator iterable by inheriting from <a href="https://tc39.es/ecma262/#sec-%23iteratorprototype%23-object">%IteratorPrototype% object</a>, however, this way is too cumbersome.</p>
+
+<p>Thankfully, there is even easier way to create iterable iterators.</p>
+
+<h2 id="generators">Generators</h2>
+
+<p>ES6 introduced generator functions which are functions returning special kind of iterator – <code class="language-plaintext highlighter-rouge">Generator</code>. <code class="language-plaintext highlighter-rouge">Generator</code> adheres to both, iterator and iterable protocol. You’ll recognize them easily by the asterix (*) sign before their name. Let’s see how both, finite and infinite list functions from above would look like when written as generator functions.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span><span class="o">*</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="nx">start</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+
+  <span class="nf">while </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">infiniteIterator</span> <span class="o">=</span> <span class="nf">infiniteList</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 6</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 7</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 8</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span> <span class="c1">// 9</span>
+
+<span class="kd">function</span><span class="o">*</span> <span class="nf">finiteList</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+  <span class="nf">while </span><span class="p">(</span><span class="nx">value</span> <span class="o">&lt;</span> <span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">finiteIterator</span> <span class="o">=</span> <span class="nf">finiteList</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">16</span><span class="p">);</span>
+
+<span class="c1">// skip 4 steps</span>
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">_</span> <span class="k">of</span> <span class="k">new</span> <span class="nc">Array</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">finiteIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nf">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">num</span> <span class="k">of</span> <span class="nx">finiteIterator</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Step by step description of what happens;</p>
+
+<ul>
+  <li>Generator function is called, returning a <code class="language-plaintext highlighter-rouge">Generator</code> object</li>
+  <li>Calling <code class="language-plaintext highlighter-rouge">next()</code> method executes it until <code class="language-plaintext highlighter-rouge">yield</code> occurs.</li>
+  <li><code class="language-plaintext highlighter-rouge">yield</code> defines a value which will be returned. Once <code class="language-plaintext highlighter-rouge">yield</code> is reached, execution at that point stops and all variable bindings are saved for the future calls.</li>
+  <li>Each subsequent <code class="language-plaintext highlighter-rouge">next()</code> call continues execution from the last reached point.</li>
+  <li><code class="language-plaintext highlighter-rouge">return</code> from a generator function says that it’s a final value of the iterator.</li>
+</ul>
+
+<p>Let’s give another, more straightforward example;</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span><span class="o">*</span> <span class="nf">lilIterator</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">yield</span> <span class="nx">value</span><span class="o">++</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">iterator</span> <span class="o">=</span> <span class="nf">lilIterator</span><span class="p">();</span>
+
+<span class="c1">// next() is called, execution is stopped at the first yield which returns 0, value is now 1</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, execution is stopped at the second yield which returns 1, value is now 2</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, execution is stopped at the third yield which returns 2, value is now 3</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// next() is called, at this point generator function has return which means that iterator will be finished with value 3</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// any subsequent next() calls will return { value: undefined, done: true }, so output here would be undefined</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">lilIterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nx">value</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>If we didn’t add <code class="language-plaintext highlighter-rouge">return</code> statement at the end of the generator function, iterator would finish after the third <code class="language-plaintext highlighter-rouge">yield</code>. And since in our example for infinite list we had <code class="language-plaintext highlighter-rouge">yield</code> inside <code class="language-plaintext highlighter-rouge">while(true) {}</code> loop, we ended up with an iterator which returns values infinitely.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I hope this article helped you to get a better understanding of iteration protocols. There are some stuff I didn’t mention (like using <code class="language-plaintext highlighter-rouge">yield*</code> for delegating to another generator function) because they wouldn’t add much point for the article. I encourage you to experiment on your own and practice these concepts in your spare time. I showed you some small examples but iterators are much more powerful than that – you’ll see this as you progress in your career (if you haven’t already).</p>
+
+<p>Let’s sum up the key points;</p>
+
+<ul>
+  <li><strong>Iterable</strong> is an object which adheres to the <em>iterable protocol</em>, meaning it has a <code class="language-plaintext highlighter-rouge">[Symbol.iterator]</code> property whose value is a method returning an <strong>iterator</strong>.</li>
+  <li><strong>Iterator</strong> is an object which adheres to the <em>iterator protocol</em>, meaning it has a <code class="language-plaintext highlighter-rouge">next()</code> method which returns an object with at least <code class="language-plaintext highlighter-rouge">value</code> and <code class="language-plaintext highlighter-rouge">done</code> properties.</li>
+  <li>Iterator <strong>can</strong> but <strong>doesn’t have</strong> to be an iterable.</li>
+  <li>We can use generator functions for creating objects adhering to both, iterable and iterator protocol.</li>
+</ul>]]></content><author><name></name></author><category term="software-development" /><category term="javascript" /><summary type="html"><![CDATA[No matter on which level you are as a JavaScript developer, you have used iterators and iterables so far, even though you may haven’t been aware of that. But what exactly they are and what’s their purpose?]]></summary></entry><entry><title type="html">7 interesting deprecated JavaScript features</title><link href="https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/" rel="alternate" type="text/html" title="7 interesting deprecated JavaScript features" /><published>2021-08-04T15:29:55+00:00</published><updated>2021-08-04T15:29:55+00:00</updated><id>https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features</id><content type="html" xml:base="https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/"><![CDATA[<p>Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged.</p>
+
+<h2 id="objectprototypewatch-and-objectprototypeunwatch-methods"><code class="language-plaintext highlighter-rouge">Object.prototype.watch</code> and <code class="language-plaintext highlighter-rouge">Object.prototype.unwatch</code> methods</h2>
+
+<p>Unce upon a time there was an easy way to watch for the property changes on an object.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">cat</span><span class="p">.</span><span class="nf">watch</span><span class="p">(</span><span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">,</span> <span class="nf">function </span><span class="p">(</span><span class="nx">propertyName</span><span class="p">,</span> <span class="nx">previousValue</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">"</span><span class="s2">Mr. </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">newValue</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Mr. Oswald!</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nf">unwatch</span><span class="p">(</span><span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Luna!</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Nowadays you can use <code class="language-plaintext highlighter-rouge">Proxy</code> for this purpose.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">set</span><span class="p">:</span> <span class="p">(</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">if </span><span class="p">(</span><span class="nx">prop</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">obj</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="s2">`Mr. </span><span class="p">${</span><span class="nx">value</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">let</span> <span class="nx">cat</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Proxy</span><span class="p">({},</span> <span class="nx">handler</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Mr. Oswald!</span>
+
+<span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...</span><span class="nx">cat</span> <span class="p">};</span> <span class="c1">// this will remove behavior imposed by Proxy</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Luna!</span>
+
+</code></pre></div></div>
+
+<h2 id="with-statement"><code class="language-plaintext highlighter-rouge">with</code> statement</h2>
+
+<p>We all know how horrible working with long chain of properties can be. Fortunately, there is a way around it. Unfortunately – you shouldn’t use it.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">details</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">passport</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">location</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">city</span><span class="p">:</span> <span class="dl">'</span><span class="s1">New York</span><span class="dl">'</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nf">with </span><span class="p">(</span><span class="nx">cat</span><span class="p">.</span><span class="nx">details</span><span class="p">.</span><span class="nx">passport</span><span class="p">.</span><span class="nx">location</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">city</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Meowyork</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>There are two reasons why you shouldn’t use <code class="language-plaintext highlighter-rouge">with</code> statement.</p>
+
+<ul>
+  <li>There is no place for optimization inside it, since you can’t predict if variable will refer to a property or to an outside variable.</li>
+  <li>It violates lexical scope, making program analysis very hard or even infeasible.</li>
+</ul>
+
+<p>Also, it will be impossible for you to use it in ES6+ (or ES5 with the strict mode turned on). Strict mode prohibits it’s usage.</p>
+
+<p><strong>Alternative</strong></p>
+
+<p>The best you can do is to declare a variable which will hold the chain of properties instead.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">details</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">passport</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">location</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">city</span><span class="p">:</span> <span class="dl">'</span><span class="s1">New York</span><span class="dl">'</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">catLocation</span> <span class="o">=</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">details</span><span class="p">.</span><span class="nx">passport</span><span class="p">.</span><span class="nx">location</span><span class="p">;</span>
+<span class="nx">catLocation</span><span class="p">.</span><span class="nx">city</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Meowyork</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="expression-closures">Expression closures</h2>
+
+<p>Long before arrow functions were even in a plan, there were expression closures. They allowed you to omit curly braces and return statements from the method definitions completely.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">food</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>This has been removed in favor of using standard ES syntax.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">food</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Nowadays you can also use arrow functions and method definitions (both introduced in ES6).</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="kd">get</span> <span class="nf">food</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="objectobserve-and-objectunobserve-methods"><code class="language-plaintext highlighter-rouge">Object.observe</code> and <code class="language-plaintext highlighter-rouge">Object.unobserve</code> methods</h2>
+
+<p>Back in the days there was also an easy way of getting an information about any changes to an object.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span>
+<span class="p">};</span>
+
+<span class="nb">Object</span><span class="p">.</span><span class="nf">observe</span><span class="p">(</span><span class="nx">cat</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">changes</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">changes</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="c1">// [{ name: 'name', object: &lt;obj&gt;, type: 'update', oldValue: 'Oswald' }]</span>
+
+<span class="nb">Object</span><span class="p">.</span><span class="nf">unobserve</span><span class="p">(</span><span class="nx">cat</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Max</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>There were the similar methods for arrays too – <code class="language-plaintext highlighter-rouge">Array.observe</code> and <code class="language-plaintext highlighter-rouge">Array.unobserve</code>.</p>
+
+<p><strong>Alternative</strong></p>
+
+<p>You can do this with <code class="language-plaintext highlighter-rouge">Proxy</code> too.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Proxy</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span>
+  <span class="na">get</span><span class="p">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">get</span><span class="dl">"</span><span class="p">,</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nb">Reflect</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">set</span><span class="p">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">set</span><span class="dl">"</span><span class="p">,</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nb">Reflect</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="c1">// { type: 'set', target: &lt;obj&gt;, prop: 'name', value: 'Luna' }</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+<span class="c1">// { type: 'get', target: &lt;obj&gt;, prop: 'name' }</span>
+</code></pre></div></div>
+
+<h2 id="let-expressions-and-let-blocks"><code class="language-plaintext highlighter-rouge">let</code> expressions and <code class="language-plaintext highlighter-rouge">let</code> blocks</h2>
+
+<p>In ES6, two statements for declaring block-scoped variables have been introduced; <code class="language-plaintext highlighter-rouge">let</code> and <code class="language-plaintext highlighter-rouge">const</code>. For the brief period of time, there were non-standard extensions to the let statement. These were <code class="language-plaintext highlighter-rouge">let</code> expressions and <code class="language-plaintext highlighter-rouge">let</code> blocks.</p>
+
+<p><code class="language-plaintext highlighter-rouge">let</code> blocks provided a way to instantiate a block where variables can have different values, without affecting the same-named ones outside of that block.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">;</span>
+
+<span class="nf">let </span><span class="p">(</span><span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Luna (2 years old)</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Oswald (2.5 years old)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">let</code> expressions did the similar thing but on the expression level.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="nf">let</span><span class="p">(</span><span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">)</span> <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span><span class="p">);</span> <span class="c1">// Oswald</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span><span class="p">);</span> <span class="c1">// Luna</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Since <code class="language-plaintext highlighter-rouge">let</code> is block scoped you can just declare variables again inside inner scope and change them there.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">;</span>
+
+<span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Luna (2 years old)</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Oswald (2.5 years old)</span>
+</code></pre></div></div>
+
+<h2 id="html-wrapper-methods-on-strings">HTML wrapper methods on strings</h2>
+
+<p>They are basically bunch of methods which wrapped your string with tags like <code class="language-plaintext highlighter-rouge">bold</code>, <code class="language-plaintext highlighter-rouge">blink</code>, <code class="language-plaintext highlighter-rouge">font</code>, <code class="language-plaintext highlighter-rouge">small</code>, <code class="language-plaintext highlighter-rouge">big</code>, <code class="language-plaintext highlighter-rouge">i</code> etc.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">Some teeny-tiny text</span><span class="dl">"</span><span class="p">.</span><span class="nf">fontsize</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>    <span class="c1">// &lt;font size="3"&gt;Some teeny-tiny text.&lt;/font&gt;</span>
+<span class="dl">"</span><span class="s2">Some tiny text.</span><span class="dl">"</span><span class="p">.</span><span class="nf">small</span><span class="p">();</span>             <span class="c1">// &lt;small&gt;Some tiny text.&lt;/small&gt;</span>
+<span class="dl">"</span><span class="s2">Some yuuuge text.</span><span class="dl">"</span><span class="p">.</span><span class="nf">big</span><span class="p">();</span>             <span class="c1">// &lt;big&gt;Some yuuge text.&lt;/big&gt;</span>
+<span class="dl">"</span><span class="s2">Talk to the hand!</span><span class="dl">"</span><span class="p">.</span><span class="nf">bold</span><span class="p">();</span>            <span class="c1">// &lt;b&gt;Talk to the hand!&lt;/b&gt;</span>
+<span class="dl">"</span><span class="s2">You have been terminated.</span><span class="dl">"</span><span class="p">.</span><span class="nf">blink</span><span class="p">();</span>   <span class="c1">// &lt;blink&gt;You have been terminated.&lt;/blink&gt;</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>There are no alternatives for this monstrosity.</p>
+
+<h2 id="parallelarray"><code class="language-plaintext highlighter-rouge">ParallelArray</code></h2>
+
+<p>This one was an experimental feature introduced by Mozilla in the Firefox (specifically, version 17 of the Gecko engine). It’s purpose was to enable data-parallelism by executing multiple functions in parallel. If it wasn’t possible, they would be executed in the sequential order.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cats</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ParallelArray</span><span class="p">([</span><span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">Max</span><span class="dl">"</span><span class="p">]);</span>
+<span class="nx">cats</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">"</span><span class="s2">😸 </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">;</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Today you can use <code class="language-plaintext highlighter-rouge">Promise.all</code> to accomplish this.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>It’s fantastic to see how much JavaScript has progressed for the last 26 years. Who could’ve thought that language made in 10 days can become one of the most dominant in the industry? I believe it’s a good practice to take a step back and see how things worked in the past. That can teach us not to repeat the same mistakes anymore. It can also make us more grateful for the things we have today. Even though I have a fair share of criticism for JavaScript, I can’t wait to see what’s coming in the next two decades.</p>]]></content><author><name></name></author><category term="software-development" /><category term="javascript" /><category term="history" /><category term="web-development" /><summary type="html"><![CDATA[Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged.]]></summary></entry><entry><title type="html">Why our software is broken?</title><link href="https://nikolastojakovic.com/2020/12/19/why-our-software-is-broken/" rel="alternate" type="text/html" title="Why our software is broken?" /><published>2020-12-19T12:08:47+00:00</published><updated>2020-12-19T12:08:47+00:00</updated><id>https://nikolastojakovic.com/2020/12/19/why-our-software-is-broken</id><content type="html" xml:base="https://nikolastojakovic.com/2020/12/19/why-our-software-is-broken/"><![CDATA[<p>Long time no see! Since May when I wrote my last post, many things happened in my life. I started living alone, moved to a new city and found a new job. I think I had pretty good rest from the writing. Today, I’ll write about a topic which interests us all; C-level staff, developers, managers, end users… Recently, I watched an <a href="https://www.youtube.com/watch?v=rmueBVrLKcY">amazing talk</a> by Joe Armstrong in which he presented quite interesting and a bit controversial thought;</p>
+
+<blockquote>
+  <p><em>Computer science is confusing because it’s not a science and there are too many ideas floating around</em>.</p>
+</blockquote>
+
+<p>I sincerely believe this can explain lot of issues in software development currently. We’re constantly trying to improve quality of our software, lower the time it takes to build it and prevent bugs. When confronted with the question how to build a quality software, different people will give you different answers. Some hardcore FP enthusiasts will try to persuade you to rewrite whole your back-end in Haskell. That person in the corner will swear by TDD. A manager on the third floor will say we should ditch agile and use waterfall.</p>
+
+<p>Most people are missing a huge factor here; <em>a failure to reduce complexity</em>.</p>
+
+<h2 id="personal-experience">Personal experience</h2>
+
+<p>In the company I worked in the past, we received a new project which had to be done in React. At that time I had a bit of experience with React and understood basic ideas behind it. There was another colleague on that project who almost never worked with React before. Right at the start, we received a task to create an image configurator. On the surface, it was basic; you could choose colors, icons, text font and other stuff. What made it quite complex was a bad design. Instead of using states, my colleague (understandably, since he worked mostly with jQuery before) did direct mutations on the DOM. If you worked with React seriously, you know this is a big <em>no-no</em>.</p>
+
+<p>Unfortunately, this part grew and became harder and harder to maintain, to the point where we spent half an hour fixing some trivial issue. This was the first time in my career where I saw how important it is to try to reduce complexity as much as you can. Sometimes we tend to go too far when we’re solving particular problem. Always keep in mind that you’re writing for other people first, and then for the machine. Machine won’t maintain your code; you’re the one who will have to explain it to others. Even if you leave the company before that, don’t do something you won’t like to experience yourself.</p>
+
+<h2 id="alright-but-how-can-i-reduce-complexity">Alright, but how can I reduce complexity?</h2>
+
+<p>Now, there is a catch. Unfortunately, it’s possible to reduce complexity of your code only to <strong>some</strong> degree. Software is inherently complex on it’s own. It has to take inputs, handle edge cases and errors, work with files and data received over the network, draw things on the screen and many other stuff. We’re developing on the machines which are dozens of times more powerful than the ones used fifty years ago. On top of that, you have deadlines, poorly documented libraries, legacy code etc. It’s understandable why software development today is much more challenging in many ways.</p>
+
+<ul>
+  <li><strong>Don’t try to appear smart</strong>. If there is a simple way to solve particular problem which works and is easy to understand, use it. Don’t build unnecessary abstractions and features no one asked for. Use descriptive variable and method names. It’s much smarter to write code which is easy to understand and maintain than something which only you will understand.</li>
+  <li><strong>Write documentation</strong>. Even <em>you</em> won’t be able to understand some parts of your code after some period of time. Describing what some part of your code does will help other people working on your code and it will help you later as well.</li>
+  <li><strong>Write tests.</strong> Sometimes, writing a test before you start implementing certain feature will help you to better design it.</li>
+  <li><strong>Ask yourself do you really need it.</strong> I can’t find that article now, but I think it was written by Joel Spolsky, ex-CEO of StackOverflow. I use it as my guiding star and I think about it whenever I’m starting to work on a new side project. In essence, it says this; your job is not to write the code, but to solve problems. Ideally, you should solve them without writing any code. Most of the time it’s not possible though, so you should strive to write least possible amount of it which will be both, well working and understandable.</li>
+</ul>
+
+<p>There are many other ways but these are some of the most important ones. Remember, it’s always about balancing. Adding new features will definitely make a whole system more complex, but that doesn’t mean we shouldn’t add new features at all. It means we should be more careful when doing so, taking into account the most important things; value it gives us (both in the short-term and long-term) as well as the effort it takes to be built and maintained.</p>
+
+<h2 id="things-should-be-as-simple-as-they-can-be-but-not-simpler-than-that">Things should be as simple as they can be, but not simpler than that</h2>
+
+<p>I’m using this Einstein’s quote fairly often when I’m talking about software development. It’s so amazing because it can be applied across many different fields. Reducing complexity in the project shouldn’t mean oversimplifying stuff. As I said, software is inherently complex on it’s own; trying to simplify something too much will have the opposite effect. For example, if you’re building a web application similar to <a href="https://lichess.org/">Lichess</a>, you’ll have to think about lots of things:</p>
+
+<ul>
+  <li>fault tolerance</li>
+  <li>handling hundreds of thousands of concurrent users</li>
+  <li>streaming</li>
+  <li>security</li>
+</ul>
+
+<p>And so on and so on. As long as you can have controlled complexity in the project, it’s okay for it to exist in the project. Controlling complexity means building a flow which will help new developers to learn how the system works so they can make contributions to it. Most obvious tool for that job is writing documentation. In an article <em>The Plea for Lean Software</em> written by Niklaus Wirth, creator of Pascal, he says something which was proven to be true more than two decades later:</p>
+
+<blockquote>
+  <p><em>The belief that complex systems require armies of designers and programmers is wrong. A system that is not understood in its entirety, or at least to a significant degree of detail by a single individual, should probably not be built.</em></p>
+</blockquote>
+
+<p>To sum up; it’s okay for some things to be complex. What you should prevent though is for things to become so complex that adding each new feature will take significant amount of time. This will make maintenance of the software painful and lead to even higher complexity in the future. The initial effort of implementing a feature is not as important as the effort of maintaining it.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>I intentionally made this article smaller than I planned to. My goal was to motivate you to think about this more. We’re witnessing enormous expansion of the software and I believe this topic will be even more relevant in the future. I’ll leave you to think more about this on your own and to do your own research on this problem. Before that, I’ll recommend you an amazing book I recently read; <a href="https://www.amazon.com/Code-Simplicity-Fundamentals-Max-Kanat-Alexander-ebook/dp/B007NZU848">Code Simplicity: The Fundamentals of Software</a> by Max Kanat. It’s only 80 pages long but contains lot of valuable information on reducing software complexity and overall proper software design. I’ll suggest you to read it and take notes. No matter which technology you use or how your projects will look, these points will be helpful to you for the rest of your career.</p>]]></content><author><name></name></author><category term="software-development" /><category term="software-design" /><summary type="html"><![CDATA[Long time no see! Since May when I wrote my last post, many things happened in my life. I started living alone, moved to a new city and found a new job. I think I had pretty good rest from the writing. Today, I’ll write about a topic which interests us all; C-level staff, developers, managers, end users… Recently, I watched an amazing talk by Joe Armstrong in which he presented quite interesting and a bit controversial thought;]]></summary></entry><entry><title type="html">Frequent questions about programming answered</title><link href="https://nikolastojakovic.com/2020/05/07/frequent-questions-about-programming-answered/" rel="alternate" type="text/html" title="Frequent questions about programming answered" /><published>2020-05-07T13:53:27+00:00</published><updated>2020-05-07T13:53:27+00:00</updated><id>https://nikolastojakovic.com/2020/05/07/frequent-questions-about-programming-answered</id><content type="html" xml:base="https://nikolastojakovic.com/2020/05/07/frequent-questions-about-programming-answered/"><![CDATA[<p>With the growth of elitism and fanboyism in software development world, as well as many questions I noticed all over the web showing fundamental misunderstanding about this topic, I felt the urge to write this article. You’re free to contribute and add your own opinions. Goal of this article is to answer the most frequently asked questions about software development.</p>
+
+<p>You’re completely free to share this article or parts of them as long as you share the source too. I will occasionally update it with new questions and answers. Questions have quite mixed up order, but I hope you’ll be able to find the answers you need. I will try to organize them better in the future.</p>
+
+<p>Initial version of this article was written on Quora so you will see few links to the answers from Quora.</p>
+
+<h2 id="what-kind-of-equipment-do-i-need-to-start-with-programming">What kind of equipment do I need to start with programming?</h2>
+
+<p>Any decent computer will do the job.</p>
+
+<p>See: <a href="https://www.quora.com/What-equipment-do-you-think-is-the-most-important-for-being-great-a-programmer/answer/Garry-Taylor-5">Garry Taylor’s answer to What equipment do you think is the most important for being great a programmer?</a></p>
+
+<h2 id="which-programming-language-should-i-learn-first">Which programming language should I learn first?</h2>
+
+<p>In my opinion, your first language should be:</p>
+
+<ul>
+  <li>easy to learn</li>
+  <li>have a strong community so you can get your answers easily</li>
+  <li>a language with many jobs available to you</li>
+</ul>
+
+<p>The most obvious choices in that case are Python, Ruby, JavaScript or PHP. All of them are easy to learn, have strong community behind them and there is a plethora of jobs for them.</p>
+
+<h2 id="do-i-need-to-be-a-great-mathematician-to-become-a-programmer">Do I need to be a great mathematician to become a programmer?</h2>
+
+<p>It depends on your field of work. For most of the things (web, desktop and mobile development), strong math background is not required. Exceptions are game development (but you can develop simple games without strong math knowledge), machine learning, data science, cryptography etc. Even then you will most probably need knowledge in some specific fields of math.</p>
+
+<p>See: <a href="https://www.quora.com/What-areas-of-computer-science-programming-software-development-require-a-good-math-background">What areas of computer science/programming/software development require a good math background?</a></p>
+
+<h2 id="do-i-need-to-know-x-text-editor--ide-to-become-a-great-programmer">Do I need to know X text editor / IDE to become a great programmer?</h2>
+
+<p>No. This is one of those annoying polemics where some people love to think highly of themselves because they use certain tools in development. Use whatever allows you to write applications. It doesn’t matter if it’s Sublime, Atom, TextMate, Vim, Emacs or anything else capable of editing source code.</p>
+
+<p>This is, of course, exception for platform-specific developers; for example, if you’re developing for Windows it’s recommended to be familiar with Visual Studio and, if you developer for iOS / Mac, it’s recommended to be familiar with XCode (and most of the time, you have no other choices). For everything else, it doesn’t really matter.</p>
+
+<h2 id="i-just-graduated-from-the-university-how-can-i-find-a-job">I just graduated from the university, how can I find a job?</h2>
+
+<p>Finding a first job in the industry can be quite hard. Don’t worry though - finding a job is easier than it was in the past.</p>
+
+<p>The first thing you should do after graduation (if you haven’t already) is to build a good portfolio. No one will expect it to be amazing so it’s enough for you to have few projects you can show you to the potential employers.</p>
+
+<p>If you don’t have any idea, here are some nice lists of project ideas you can try to implement:</p>
+
+<ul>
+  <li><a href="https://github.com/karan/Projects">A list of practical projects that anyone can solve in any programming language</a></li>
+  <li><a href="https://github.com/florinpop17/app-ideas">A collection of application ideas which can be used to improve your coding skills</a></li>
+  <li><a href="https://github.com/tuvtran/project-based-learning">A curated list of project-based tutorials</a></li>
+</ul>
+
+<p>Post your projects on the GitHub and attach the link to your GitHub profile in your CV. Google for the software development job boards in your country and look for the internships or the junior developer jobs. Don’t worry if you don’t know all the things listed on the job post. Be persistent and eventually you’ll land the job.</p>
+
+<h2 id="is-java-slow">Is Java slow?</h2>
+
+<p>No. Right now we’re in 2020, not in 1995. JVM is developed by some really badass software engineers who know what they’re doing much better than those who call languages slow. If your application is slow, shame on you, it’s not the problem of Java (or you’re trying to do something for which Java isn’t made for, like, developing OS in Java, which, again, is not the problem of Java itself).</p>
+
+<h2 id="is-java-dead">Is Java dead?</h2>
+
+<p>It looks like it’s dying last 22 years. It’s kinda hard to kill someone who owns the top place for decades.</p>
+
+<p>Again, no.</p>
+
+<h2 id="whats-the-best-programming-language-ever">What’s the best programming language ever?</h2>
+
+<p>This is like asking what’s the best tool ever. Seriously, do you really think that hammer is better than a screwdriver or a saw? Same thing with languages.</p>
+
+<p>If language X is suitable for your project, use it. If you don’t know it, see if there are other languages suitable for your project which you already know.</p>
+
+<p>In case you find the more suitable language you already know, use it. If there is no such language, learn one which is suitable for your project.</p>
+
+<h2 id="is-x-programming-language-dead">Is X programming language dead?</h2>
+
+<p>If there is need for developers to maintain projects written in X programming language, that language is not dead. Cobol was invented almost sixty years ago and it’s still relevant and used by many institutions (this doesn’t mean it’s a good idea to learn it today though).</p>
+
+<h2 id="is-x-programming-language-bad">Is X programming language bad?</h2>
+
+<p>Language can have some weird design choices of authors or it can have some quirks and weird behaviour (most notable ones are PHP and JavaScript), but if it does the job well, use it. If it’s bad, learn how to use it in your favor and try to avoid bad practices.</p>
+
+<p>If you have no choice (e.g. JavaScript on front-end), then you need to use it.</p>
+
+<h2 id="i-learned-x-programming-language-whats-the-next-i-language-i-should-learn">I learned X programming language, what’s the next I language I should learn?</h2>
+
+<p>Stop.</p>
+
+<p>First, you haven’t learned A programming language. There is no way for someone to completely learn any programming language. Even if you managed to remember all of it’s keywords and the whole standard library, you still haven’t learned it.</p>
+
+<p>No one cares how many programming languages do you know. As I already said in one of my previous points, languages are tools. It’s what you make with them which matters. Good engineer knows which tools are suitable for certain jobs and which aren’t.</p>
+
+<p>Stop learning languages and start writing apps.</p>
+
+<h2 id="what-os-should-i-use-for-developing-apps-windows-linux-or-macos">What OS should I use for developing apps, Windows, Linux or macOS?</h2>
+
+<p>It doesn’t really matter, except if you develop platform-specific apps. If you want to develop apps for platform X, it’s the best choice to actually do it on platform X. For iOS, it’s best to develop apps for it on macOS as primary development tool, XCode, is made for it. If platform X is Android, it doesn’t matter because ADK is available for all of these platforms (apply the same pattern for all other platforms). In other cases, it doesn’t really matter.</p>
+
+<p>If you’re a web developer, knowing Linux will be quite beneficial, as most web servers today use it. Don’t worry if you never used it before. It’s possible to play with Linux without actually installing it on the hardware (feature known as Live CD). The only thing you need is a USB stick and an ISO image of the distribution you want to try (Ubuntu will be easiest).</p>
+
+<p>See also: <a href="https://www.quora.com/Is-Windows-really-a-bad-programming-OS/answer/Garry-Taylor-5">Garry Taylor’s answer to Is Windows really a bad programming OS?</a></p>
+
+<h2 id="how-much-hours-a-day-do-i-need-to-spend-to-learn-programming">How much hours a day do I need to spend to learn programming?</h2>
+
+<p>It depends on your schedule (if you have any). There’s no definite answer for this - you should find some balance, but as it’s true with almost anything else, the more time you spend learning and practicing, the more things you will learn.</p>
+
+<p>However, don’t forget that brain needs the rest too. The best way to learn new things is to practice them so, once you’re finished with the basics, try to make some small projects in that language.</p>
+
+<h2 id="why-company-x-doesnt-rewrite-its-application-in-language-y-but-stays-with-language-z">Why company X doesn’t rewrite it’s application in language Y but stays with language Z?</h2>
+
+<p>Because rewriting whole applications in other language is:</p>
+
+<ul>
+  <li>costly</li>
+  <li>time consuming</li>
+  <li>introduces possibility of new bugs</li>
+</ul>
+
+<p>Rewriting application in another language is almost always a wrong choice. Check <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">this article</a> by Joel Spolsky.</p>
+
+<h2 id="linus-torvalds-said-that-c-is-crap-it-must-be-true-because-he-wrote-such-a-big-project-as-linux-right">Linus Torvalds said that C++ is crap, it must be true because he wrote such a big project as Linux, right?</h2>
+
+<p>Nope. Linus is human being and human beings, because of their imperfect nature, have their prejudices.</p>
+
+<p>Check out this article: <a href="http://warp.povusers.org/OpenLetters/ResponseToTorvalds.html">A response to Linus Torvalds on C++</a>.</p>
+
+<h2 id="how-much-time-does-it-take-to-learn-a-programming-language-x">How much time does it take to learn a programming language X?</h2>
+
+<p>It depends on your experience. If programming language X is, for example, Haskell, which is pure functional language, and you had prior experience only with imperative languages only, you’ll have to learn completely new paradigm, not just the new language.</p>
+
+<p>Learning programming languages is easy, it’s writing software which is actually hard and needs much more effort.</p>
+
+<h2 id="do-i-need-to-have-a-degree-to-get-a-job-as-a-programmer">Do I need to have a degree to get a job as a programmer?</h2>
+
+<p>For some jobs, having degree in computer science will be necessary.</p>
+
+<p>If you have a change to get a degree, go for it. If you don’t, focus more on building your portfolio.</p>
+
+<h2 id="what-topics-should-i-study-to-become-a-great-programmer">What topics should I study to become a great programmer?</h2>
+
+<p>To become a great programmer, you should have good analytical skills and know how to find the best possible way to accomplish the goal in a limited time period. There is no definite answer to this question but in my opinion, you should become familiar with this topics:</p>
+
+<ul>
+  <li><strong>Algorithms</strong> - you don’t have to memorize them all, but you should get the idea when particular algorithm is the most suitable for your problem. You’ll learn how to implement basic once as you progress in your career.</li>
+  <li><strong>Data Structures</strong> - you should learn their memory and time complexity and again, when particular data structure is suitable for storing certain information.</li>
+  <li><strong>Object-oriented Programming</strong> - it’s the most important paradigm today and knowing it is mandatory.</li>
+  <li><strong>Object-oriented Design Patterns</strong> - if you want to further advance your knowledge of OOP (as you should), design patterns are the next station for you. Again, you don’t have to memorize them but to know when certain design pattern is a good choice for organizing part of the code base.</li>
+  <li><strong>Software Documentation</strong> - documenting your code helps you and your colleagues to better understand code base. By writing it, you’ll be thankful to yourself after few months / years as you’ll be much more able to understand what you wrote than if you left just code, without explaining what it does.</li>
+  <li><strong>Testing</strong> - it’s often told that project which has no tests is not complete (and I mostly agree with this). By writing unit tests, you ensure that your code base is stable and ready to be extended without disastrous consequences.</li>
+</ul>
+
+<p>You should also learn how to write clean and organized code. For this topic, I recommend a book <a href="https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882">Clean Code</a> by Robert Cecil Martin.</p>]]></content><author><name></name></author><category term="software-development" /><category term="advices" /><category term="career" /><category term="beginners" /><category term="index" /><summary type="html"><![CDATA[With the growth of elitism and fanboyism in software development world, as well as many questions I noticed all over the web showing fundamental misunderstanding about this topic, I felt the urge to write this article. You’re free to contribute and add your own opinions. Goal of this article is to answer the most frequently asked questions about software development.]]></summary></entry><entry><title type="html">In defense of TypeScript</title><link href="https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/" rel="alternate" type="text/html" title="In defense of TypeScript" /><published>2020-04-18T11:58:52+00:00</published><updated>2020-04-18T11:58:52+00:00</updated><id>https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript</id><content type="html" xml:base="https://nikolastojakovic.com/2020/04/18/in-defense-of-typescript/"><![CDATA[<p>I know what you may think now. <em>Here we go, yet another article telling us how great TypeScript is.</em> Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (<a href="https://insights.stackoverflow.com/survey/2017#most-loved-dreaded-and-wanted">2017</a>, <a href="https://insights.stackoverflow.com/survey/2018#most-loved-dreaded-and-wanted">2018</a>, <a href="https://insights.stackoverflow.com/survey/2019#most-loved-dreaded-and-wanted">2019</a>), we can see that TypeScript was always in the four most loved programming languages.</p>
+
+<p>While it’s true that TypeScript is very popular and loved by developers all around the world, we still see misconceptions about it every day. Look - it’s okay if you find TypeScript off-putting or you just don’t need it. I never had to use Python in my workflow and I don’t like it, but I see why people would use it. So, why do we need to talk about TypeScript?</p>
+
+<h2 id="javascript-ecosystem-has-evolved">JavaScript ecosystem has evolved</h2>
+
+<p>Not so long ago, JavaScript was a little more than language for showing fancy animations on the web. Nowadays, beside being used on the web, JavaScript is used for writing desktop applications (Electron), server-side applications (Node.js) and even for the IoT. Currently, there are over 1 230 000 packages on the NPM (data by <a href="http://www.modulecounts.com/">modulecounts</a>). There are many courses, tutorials and jobs for JavaScript developers out there. All in all, knowing JavaScript today is a huge advantage. This is true even if you don’t plan using it as your primary language.</p>
+
+<p>But things are not so great as they may look at first. We all know about <a href="https://www.google.com/search?q=node_modules+memes&amp;source=lnms&amp;tbm=isch&amp;sa=X&amp;ved=2ahUKEwjIr--l4a7oAhUy_SoKHXHFC1MQ_AUoAXoECAsQAw&amp;biw=1920&amp;bih=897">node_modules jokes</a>. With so much popularity and easiness of learning comes a bad code too. We saw that with PHP. This is not a fault of JavaScript, especially not today. As it’s often the case, it’s about people. Now, there are countless debates whether technology needs to set some limits to prevent the misuse or give it’s users free hands. I won’t open that discussion in this article. I will just try to address some common misconceptions about TypeScript.</p>
+
+<h2 id="misconception-1---typescript-has-no-real-purpose">Misconception #1 - TypeScript has no real purpose</h2>
+
+<p>Who knows how many times I heard this. People asking me why do they need to learn another language which basically boils down to the JavaScript. The truth is - you don’t need to. It’s quite possible to spend the rest of your career without ever touching any TypeScript code. But my question is why would you do such thing? Why not giving a chance to a tool which can help you to write a better software?</p>
+
+<p>TypeScript definitely has it’s purpose and the most important ones are;</p>
+
+<ul>
+  <li><strong>Improving communication on the team</strong> - JSDoc is helpful, but it isn’t that powerful and you need to always check the whole documentation to be sure that information in it is still valid.</li>
+  <li><strong>Helping with refactoring</strong> - trying to change that method to return a different data in JavaScript? Pray it won’t break half of your project where that method was used.</li>
+  <li><strong>Preventing you from making dumb mistakes</strong> - adding numbers and strings, no matter how handy can be sometimes, can cause you a great pain in the long run.</li>
+  <li><strong>Allowing you to scale your project easier</strong> - that JavaScript that scales caption you see on the TypeScript’s site? Yup, it’s true.</li>
+</ul>
+
+<p>Even if TypeScript had no practical purpose, it still wouldn’t be a good reason not to learn it. There are some languages (like Scheme, Haskell or Prolog) which may not get you a job[1] but will definitely expand your horizons and help you to become a better developer. Giving the fact that TypeScript is now used by many companies, there is one more reason to at least try it.</p>
+
+<h2 id="misconception-2---typescript-is-hard">Misconception #2 - TypeScript is hard</h2>
+
+<p>Whether something is hard or not is pretty much subjective. In my opinion, TypeScript won’t be hard to a person with solid knowledge of JavaScript. By solid knowledge, I mean you have few JavaScript application running in the production and you understand core subjects (scopes, closures, event loop, prototypes etc). If that’s the case, learning TypeScript won’t be a problem to you. However, if you didn’t have a chance to work with static typed language before (C#, Java, C++ or similar language), it will take some time to get used to it. Again, this shouldn’t be an issue because of the <em>gradual typing</em>.</p>
+
+<p>Gradual typing allows us to slowly migrate our projects from JavaScript to TypeScript by using <code class="language-plaintext highlighter-rouge">any</code> in places where we’re still not sure about concrete data types. Let’s see it on the practical example. Here is a JavaScript method which will fetch badges of the user with specific username.</p>
+
+<script src="https://gist.github.com/panther99/902a6151844875bf5e7b2ff2da2e6634.js"></script>
+
+<p>Let’s say we chose to slowly migrate our project from JavaScript to TypeScript and we’re turning on <code class="language-plaintext highlighter-rouge">strict</code> setting in our <code class="language-plaintext highlighter-rouge">tsconfig.json</code> like we should do. TypeScript will give us a warning for the method above:</p>
+
+<p><img src="/assets/2020/04/type-error-parameter-implicit-any.png" alt="typeerror parameter implicitly any" class="center-image" /></p>
+
+<p>The error above means that we have not explicitly set what type username parameter should have. When type is not set, TypeScript assumes you’d like it’s type to be <code class="language-plaintext highlighter-rouge">any</code> (which basically means it can be anything). Fortunately, strict option prevents us from shooting ourselves in the foot. Why? Because having implicitly set parameters throughout the project is the surest path to a disaster. As our project grows we will forget about these places and we won’t get the benefits of TypeScript’s compiler analysis. Also, it’s pretty obvious by the parameter’s name what data type we would like it to have.</p>
+
+<h2 id="wait-a-second">Wait a second…</h2>
+
+<p>But what about <code class="language-plaintext highlighter-rouge">user</code> and <code class="language-plaintext highlighter-rouge">badges</code>? We certainly don’t want to use them as <code class="language-plaintext highlighter-rouge">number</code>s, <code class="language-plaintext highlighter-rouge">string</code>s or <code class="language-plaintext highlighter-rouge">boolean</code>s but as the objects with their respective properties and methods. For now, we will explicitly define them as <code class="language-plaintext highlighter-rouge">any</code> (even though we’re not required to do so). We will define badges as <code class="language-plaintext highlighter-rouge">any[]</code> as we know it will return array of some data type. We can also do this for parameters where we’re still not sure what data type they will have. Let’s see our refactored method now.</p>
+
+<script src="https://gist.github.com/panther99/376e143d2f255147dc8d4173114645ed.js"></script>
+
+<p>Now you may ask what makes such a difference between setting something as <code class="language-plaintext highlighter-rouge">any</code> or <code class="language-plaintext highlighter-rouge">any[]</code>. Well, it’s certainly better to know that something will be array of some things than some thing (which can be array of some things or who knows what else). But let’s say we want to have a method which will check whether user has any badges:</p>
+
+<script src="https://gist.github.com/panther99/4b579b5bd7f7f8470ad089538d0c625c.js"></script>
+
+<p>As TypeScript knows that <code class="language-plaintext highlighter-rouge">fetchUserBadges</code> method will return <code class="language-plaintext highlighter-rouge">Promise&lt;any[]&gt;</code> (a <code class="language-plaintext highlighter-rouge">Promise</code> which when it’s resolved will return <code class="language-plaintext highlighter-rouge">any[]</code>), it can give us available properties and methods as we’re writing the method:</p>
+
+<p><img src="/assets/2020/04/array-length-property.png" alt="array length property" class="center-image" /></p>
+
+<p>I know, I know, this is pretty simple example but that’s the whole point – TypeScript on it’s own is <em>not</em> hard. It just takes time to learn how to use it properly, just like it’s the case with any technology out there. Just because you can hack something quickly in the JavaScript doesn’t make it easy. You will still have to learn it’s core concepts in the hard way, by making mistakes and learning from them.</p>
+
+<h2 id="misconception-3--typescript-slows-you-down-too-much">Misconception #3 – TypeScript slows you down too much</h2>
+
+<p>There is something people don’t quite understand when they compare dynamic typed languages with static / strong typed ones. If you ever followed any programming memes page (please don’t if you care about your health), you have probably noticed some image with comparison of Hello world program in Java (C#, C++ or any other static typed language) and in the Python. People who make images like this would like to prove to us how superior Python is. Sadly, they just ruin Python’s image with such lack of understanding some basic things.</p>
+
+<p>Obviously, writing down types does make you slower than not writing them. But that initial work will make you faster in the long run. This means that:</p>
+
+<ul>
+  <li>Debugging will be easier once your project grows</li>
+  <li>Navigating code base will be quicker</li>
+  <li>You will catch many bugs before the runtime</li>
+  <li>Your code will basically document itself (but this doesn’t mean you don’t have to write documentation)</li>
+</ul>
+
+<p>Now, of course, this doesn’t mean you should use TypeScript for every project. Recently I built a simple weather application in TypeScript (I used TypeScript on both, front-end and the back-end) and I wished I did it in JavaScript. But it’s because I only had three routes and three different views on the front-end. TypeScript didn’t help me much there. This is not a fault of TypeScript. It would have many benefits if I chose to extend my application with various services. And / or more complex state management on the front-end.</p>
+
+<h2 id="misconception-4--typescript-was-made-by-microsoft-therefore-it-cant-be-good">Misconception #4 – TypeScript was made by Microsoft, therefore it can’t be good</h2>
+
+<p>Many of us probably know about Microsoft’s dark history. But as someone who hated Microsoft with passion (and still don’t have any sympathies towards it), I can say that Microsoft really changed since Satya Nadella took the position of the CEO, at least with their stance towards open source software. If I can list three great things that Microsoft gave us they would be these ones (in no particular order):</p>
+
+<ul>
+  <li><strong>C#</strong> - modern language with great support for building safe and robust desktop, server-side and even mobile applications</li>
+  <li><strong>Visual Studio Code</strong> - probably the best open source code editor on the market today with hundreds of thousands extensions and constant improvements in each version (built with TypeScript)</li>
+  <li><strong>TypeScript</strong> - do I need to say more?</li>
+</ul>
+
+<p>Saying that TypeScript is bad because it was made by Microsoft is childish at best. We may not like Microsoft’s business strategy but we need to remember that there are thousand of workers in the Microsoft who do their best to build amazing products and TypeScript is definitely one of them.</p>
+
+<h2 id="misconception-5--typescript-is-hard-to-read">Misconception #5 – TypeScript is hard to read</h2>
+
+<p>Another variation of the misconception #2. When people say that TypeScript is hard to read, they often mean that projects they’re trying to contribute to or libraries they’re using are hard to read. This is understandable, considering how complex types can become in a TypeScript codebase.</p>
+
+<p>But guess what? TypeScript is not harder to read than any other strong typed language. It’s about inherent complexity of the project you’re trying to dive in and if you ever worked on production-level apps you know they can grow very quickly. Even in smaller applications type definitions could be long and tedious to read. I remember when I wanted to add types to the <code class="language-plaintext highlighter-rouge">Object.entries</code> method. I ended up writing something like this:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">typedObjectEntries</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">entries</span> <span class="nf">as </span><span class="p">(</span>
+    <span class="nx">o</span><span class="p">:</span> <span class="nx">T</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">=&gt;</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="p">[</span><span class="nb">Extract</span><span class="o">&lt;</span><span class="kr">keyof</span> <span class="nx">T</span><span class="p">,</span> <span class="kr">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="nx">T</span><span class="p">[</span><span class="kr">keyof</span> <span class="nx">T</span><span class="p">]]</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>And I ended up calling it whenever I was using <code class="language-plaintext highlighter-rouge">Object.entries</code> in the project (and this was before I knew I should import <code class="language-plaintext highlighter-rouge">es2017</code>). I know what it does, it’s well named and there is no reason to make it simpler just because someone will spend a bit more time reading it. If it’s not so obvious what the method does, you can always add documentation for it. Writing unreadable code is bad, but simplifying code where you shouldn’t could be much worse. Einstein has famously said:</p>
+
+<blockquote>
+  <p>Everything should be made as simple as possible, but not simpler than that.</p>
+</blockquote>
+
+<p>So, when the code looks hard to read, ask yourself a question. Is it possible for me to simplify this without affecting it’s intent? Would simplifying this code bring any benefits or it can lead to bigger confusion? Don’t think about problems like these through the prism of the programming language. Always try to solve a problem by applying general solutions, and later customize it to follow idioms of the language.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As it’s often the case, this article sums up my experiences of working with TypeScript and in no way tries to pose as a list of empirical facts. I hope it will at least help some people to reconsider their decision to reject using TypeScript in their workflow. Some will disagree with the opinions I expressed here for sure. And that’s okay. I may be biased as an advocate of static typed languages, but I would really like to hear your opinions. I also hope this won’t cause another heated debate. The goal of this article is to question the most common misconceptions about TypeScript, not to bash JavaScript (which, at the end, TypeScript <em>is</em> mostly).</p>
+
+<p>[1] This doesn’t mean you can’t find jobs for Haskell or Prolog developers. I think Scheme is used pretty much only on the university, but Clojure is a variant of Lisp which is used more for commercial projects.</p>]]></content><author><name></name></author><category term="software-development" /><category term="typescript" /><category term="javascript" /><category term="development" /><summary type="html"><![CDATA[I know what you may think now. Here we go, yet another article telling us how great TypeScript is. Why do we need to defend a language backed by Microsoft? With typings available for pretty much every popular NPM package out there? And from whom specifically? If we take a look at results of StackOverflow developer surveys for the last three years (2017, 2018, 2019), we can see that TypeScript was always in the four most loved programming languages.]]></summary></entry><entry><title type="html">5 mistakes I have made as a beginner</title><link href="https://nikolastojakovic.com/2020/02/09/5-mistakes-i-have-made-as-a-beginner/" rel="alternate" type="text/html" title="5 mistakes I have made as a beginner" /><published>2020-02-09T13:15:02+00:00</published><updated>2020-02-09T13:15:02+00:00</updated><id>https://nikolastojakovic.com/2020/02/09/5-mistakes-i-have-made-as-a-beginner</id><content type="html" xml:base="https://nikolastojakovic.com/2020/02/09/5-mistakes-i-have-made-as-a-beginner/"><![CDATA[<p>I’ll spare you a lecture about mistakes. I know you’re here to read a concrete advice. After about four years of professional career and eight years since I wrote the first program, the time has finally come. I’m posting this in a hope you won’t repeat the same mistakes I did. But don’t expect to dodge all the bullets. In both, life and software development, the best you can do is to minimize the eventual damage.</p>
+
+<h2 id="1-learning-many-languages">1. Learning many languages</h2>
+
+<p>The first <em>real</em> program I wrote (and by real I don’t mean <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">Hello world</a>) was a quiz game in C++. Not long after that I have tried VB.NET, Java, C, Python, C#, Ruby, JavaScript, Perl and even Pascal. I was switching languages like an expert in the industry with decades of experience, while in fact I wasn’t even a strong junior. Thankfully, this period didn’t last long. But I know there are still juniors doing it today. Dozens of times I would get a question on Quora in this form;</p>
+
+<blockquote>
+  <p>I have learned A and B language, should I learn C, D or E programming language?</p>
+</blockquote>
+
+<p><a href="http://www.aplusdev.org/About/index.html">Ironically</a>, <a href="https://en.wikipedia.org/wiki/B_(programming_language)">all</a> <a href="https://en.wikipedia.org/wiki/C_(programming_language)">these</a> <a href="https://en.wikipedia.org/wiki/D_(programming_language)">languages</a> <a href="https://en.wikipedia.org/wiki/E_(programming_language)">exist</a> (imagine there were mainstream languages instead of letters). While it’s true that experienced software engineers do know multiple languages, you should start by learning only one language. When you finish learning fundamentals of the language, you should start doing practical projects in it. Same applies to any tool / library / framework.</p>
+
+<p>On the other hand, it doesn’t mean you should spend whole your career knowing only one language. Reading about other languages and even playing with them from time to time will help you to broaden your horizons. You will discover new paradigms and new approaches for solving problems. Just don’t become too obsessed with it like I was in the beginning of my career.</p>
+
+<h2 id="2-focusing-too-much-on-the-theory">2. Focusing too much on the theory</h2>
+
+<p>The most common thing presented as a disadvantage of self-taught developers is a lack of formal education. For someone who is self-taught, I had good theoretical foundation quite early in my career. But it took few years before I filled my CV with projects I can show off to future employers. Not because I wasn’t able to do the same thing in one year, but because I was losing focus on other things.</p>
+
+<p>Now, don’t take this wrong. Theory <strong>is</strong> important. There is a good reason why almost all people who are pushing boundaries of our field have computer science degrees and PhDs. At the end of the day, someone has to build the tools we’re using on our job, from compilers to web browsers. But all the theory on this world won’t help you to write a better code if you don’t start <strong>writing</strong> it now.</p>
+
+<p>Sure, writing top-down insertion algorithm for red-black trees from the top of your head is great, but does it really serve any purpose for a web developer working on small business sites? I highly doubt that. Try to enjoy the first year of your career as a developer as much as you can and build the stuff without caring whether your queries are highly tuned or whether your classes expose too much information. You will have enough time to worry about that later on in your career.</p>
+
+<h2 id="3-avoiding-to-read-other-peoples-code">3. Avoiding to read other people’s code</h2>
+
+<p>For a long time I had some sort of <em>fear</em> of reading other people’s code. I was like, how can I understand something someone wrote X months or years before? Heck, sometimes I don’t even understand my own code after a few months! Of course, I knew about comments, but I had no idea about documentation at that time (you should see the look on my face when I discovered there is a way to test your software automatically).</p>
+
+<p>I finally became comfortable reading other people’s code when I stumbled upon few problems which required from me to go beyond the library documentation. I had to truly understand what’s happening under the surface. And for that, you need to dive in the source code. You need to step through each instruction and ask yourself questions in the process. You can’t become a great poet without reading any poetry. And you can’t become a great developer without reading any code.</p>
+
+<p>This was an enlightening experience to say the least. It was the moment I realized there are no perfect developers. I have discovered chunks of dead code, unnecessary abstractions, obscure optimizations and lots of shitty code overall. Early in my career I thought that each of my projects will be an empty sheet. What they often don’t tell you about software development is that you’ll spend most of your time working on the code your colleagues have written. Learn to accept that and your life will be a lot easier.</p>
+
+<h2 id="4-starting-to-learn-with-advanced-projects">4. Starting to learn with advanced projects</h2>
+
+<p>Compilers, operating systems, browser engines, databases, frameworks, CVSs… There are all sorts of fascinating things people have built in our field. Some of them have multiple human-life spans of work behind them and knowledge passed on by generations. I think pretty much every developer once in their career thought about making their own framework or programming language. Unfortunately, I spent too much time thinking about it and even trying to replicate some of this stuff.</p>
+
+<p>Before you try to run, you should learn how to walk. It’s not that you won’t learn much from writing your own operating system, for example. You definitely will. But before you try to bite more than you can chew, do a research and see if you have prerequisites to even start doing something. Developing an operating system requires solid knowledge in dozens of topics. Computer architecture, Assembly, file systems, memory management, concurrency etc. And you still won’t be able to write something even close to Windows.</p>
+
+<p>Healthy advancement is the key. Moving some parts of your monolithic apps to isolated services can be example of that. Or writing a simple MVC application from the ground up in PHP, without using any framework. This way you won’t become overwhelmed by the learning material and you will still learn more advanced stuff.</p>
+
+<h2 id="5-not-spending-time-with-other-developers">5. Not spending time with other developers</h2>
+
+<p>The first developer I have ever met was a friend from secondary school (I was 16 at the time). Before that I had no idea how important networking is. I discovered there are a few guys from my school who were also developing stuff in their spare time. That’s how my professional career started. I did enough jobs to fill my CV with something valuable and landed my first full-time job in 2018. If it wasn’t for this connections, my career would probably start much later.</p>
+
+<p>People typically have this notion of developers being lone wolves avoiding any human contact. This has to stop. It’s a toxic view which just harms the community. You <strong>should</strong> ask the questions. You <strong>should</strong> attend that meetup. One of the reasons why I started blogging was to make new contacts. But it doesn’t have to be blogging. You may find public speaking more engaging. Or it could be that you’re introverted and feel more comfortable speaking with people online. Everything is fine, as long as you don’t lose the contact with the rest of community.</p>
+
+<p>You don’t have to spend time with other developers only when you need some help. Being active in the community allows you to keep up on the new trends too. You can explore new approaches for solving problems or even help someone else. One day on my job I struggled to design a layout for the cross-sell popup on one site. I asked colleague who worked as a front-end developer for help. He then introduced me to Flexbox and even gave me <a href="https://yoksel.github.io/flex-cheatsheet/">Flexbox Cheatsheet</a>. This is one of the advantages of working on-site; you can easily ask for help.</p>]]></content><author><name></name></author><category term="software-development" /><category term="advices" /><category term="career" /><summary type="html"><![CDATA[I’ll spare you a lecture about mistakes. I know you’re here to read a concrete advice. After about four years of professional career and eight years since I wrote the first program, the time has finally come. I’m posting this in a hope you won’t repeat the same mistakes I did. But don’t expect to dodge all the bullets. In both, life and software development, the best you can do is to minimize the eventual damage.]]></summary></entry><entry><title type="html">Mental gymnastics with C# – Part I</title><link href="https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/" rel="alternate" type="text/html" title="Mental gymnastics with C# – Part I" /><published>2020-02-02T20:01:33+00:00</published><updated>2020-02-02T20:01:33+00:00</updated><id>https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i</id><content type="html" xml:base="https://nikolastojakovic.com/2020/02/02/mental-gymnastics-with-c-part-i/"><![CDATA[<p>What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the <a href="https://dev.to/thepracticaldev/daily-challenge-1-string-peeler-4nep">Daily Challenge series</a> on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills.</p>
+
+<p>Instead of just throwing solutions for the challenges, I will go through the <em>mental flow</em> for each problem and explain why I wrote what I wrote. In my opinion this is the most important thing behind solving code challenges. It will hopefully be helpful to those who are also solving them. I will also write unit tests for each solution.</p>
+
+<p>The code probably won’t be the most idiomatic C# nor it would be the most performant (even though I will try my best). I truly recommend you to try to solve each challenge on your own first. There is no better way to push limits of your knowledge than to tackle with challenging problems on your own.</p>
+
+<p>Without further ado, let’s get started with the actual challenges, shall we? As you will see, the first part will pretty much be the warm-up.</p>
+
+<h2 id="challenge-1---string-peeler">Challenge #1 - String Peeler</h2>
+
+<blockquote>
+  <p>Your goal is to create a function that removes the first and last letters of a string. Strings with two characters or less are considered invalid. You can choose to have your function return null or simply ignore.</p>
+</blockquote>
+
+<p>There is no much going on here. If the text has less than three characters, we will return <code class="language-plaintext highlighter-rouge">null</code>. In case it doesn’t, we will ensure that our text won’t have surrounding white space characters with <code class="language-plaintext highlighter-rouge">String.Trim</code> and use <code class="language-plaintext highlighter-rouge">String.Substring</code> to leave only the characters we want.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringPeeler</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">RemoveFirstAndLastLetter</span><span class="p">(</span><span class="kt">string</span> <span class="n">text</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">trimmedText</span> <span class="p">=</span> <span class="n">text</span><span class="p">.</span><span class="nf">Trim</span><span class="p">();</span>
+        <span class="k">return</span> <span class="n">trimmedText</span><span class="p">.</span><span class="n">Length</span> <span class="p">&lt;</span> <span class="m">3</span>
+            <span class="p">?</span> <span class="k">null</span>
+            <span class="p">:</span> <span class="n">trimmedText</span><span class="p">.</span><span class="nf">Substring</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="n">trimmedText</span><span class="p">.</span><span class="n">Length</span> <span class="p">-</span> <span class="m">2</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">sentence</span> <span class="p">=</span> <span class="s">"I am just playing my best move"</span><span class="p">;</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">Program</span><span class="p">.</span><span class="nf">RemoveFirstAndLastLetter</span><span class="p">(</span><span class="n">sentence</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="challenge-2---string-diamond">Challenge #2 - String Diamond</h2>
+
+<blockquote>
+  <p>The shape that the print method will return should resemble a diamond. A number provided as input will represent the number of asterisks printed on the middle line. The line above and below will be centered and will have two less asterisks than the middle line. This reduction will continue for each line until a line with a single asterisk is printed at the top and bottom of the figure.</p>
+
+  <p>Return <code class="language-plaintext highlighter-rouge">null</code> if input is an even number or a negative number.</p>
+</blockquote>
+
+<p>When I stumble upon a problem which initially seems a bit trickier, I like to observe a sample output and see if I can find any patterns. Sometimes, this may be misleading because not all solutions follow the same patterns. But sometimes, it could be helpful, like you will see in this case.</p>
+
+<p>Observing string diamonds, we can see that they contain only spaces and stars. What I tried to do first is to find some ratio between number of spaces and number of stars on the same line. As you can see for yourself, number of spaces is always even, and number of stars is always odd.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      *           8 spaces, 1 star
+     ***          6 spaces, 3 stars
+    *****         4 spaces, 5 stars
+   *******        2 spaces, 7 stars
+  *********       0 spaces, 9 stars
+   *******        2 spaces, 7 stars
+    *****         4 spaces, 5 stars
+     ***          6 spaces, 3 stars
+      *           8 spaces, 1 star
+
+</code></pre></div></div>
+
+<p>Take a look at numbers - you see how they repeat in a different order once you pass the horizontal center line of the diamond? This is very important because it will allow us to find how many spaces each line has.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">startingPoint</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-</span><span class="n">startingPoint</span><span class="p">;</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheLeftSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheRightSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>As we can’t just move towards zero and move back upwards without changing value of the iterator in the loop itself, we will move past zero and use <code class="language-plaintext highlighter-rouge">Math.Abs</code> to preserve positive numbers. It doesn’t make much sense to know only the total number of spaces; we need number of spaces on left side and number of spaces on the right side of the line.</p>
+
+<p>You probably wonder where did <code class="language-plaintext highlighter-rouge">startingPoint</code> suddenly came from. That’s just a placeholder - we will calculate this value right now. In the example above, <code class="language-plaintext highlighter-rouge">startingPoint</code> will be four, because we have four spaces on the each side. Four is also a number of rows below and above horizontal center line. We will get this number by dividing width of the diamond (which in this case is nine).</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheLeftSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">spacesOnTheRightSide</span> <span class="p">=</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">numberOfStars</span> <span class="p">=</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Great! Now we have all the numbers we need to actually draw the string diamond. But how are we going to do that without adding new <code class="language-plaintext highlighter-rouge">for</code> loops for drawing multiple spaces and stars? We will use the particular <code class="language-plaintext highlighter-rouge">System.String</code> constructor overload which will allow us to repeat a character multiple times.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+<span class="p">{</span>
+    <span class="kt">string</span> <span class="n">spaces</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">' '</span><span class="p">,</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+    <span class="kt">string</span> <span class="n">stars</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">'*'</span><span class="p">,</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we’re able to write the whole solution:</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">StringDiamond</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">DrawDiamond</span><span class="p">(</span><span class="kt">int</span> <span class="n">width</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">width</span> <span class="p">%</span> <span class="m">2</span> <span class="p">==</span> <span class="m">0</span> <span class="p">||</span> <span class="n">width</span> <span class="p">&lt;</span> <span class="m">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="kt">string</span> <span class="n">diamond</span> <span class="p">=</span> <span class="s">""</span><span class="p">;</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span> <span class="p">&gt;=</span> <span class="p">-(</span><span class="n">width</span> <span class="p">/</span> <span class="m">2</span><span class="p">);</span> <span class="n">i</span><span class="p">--)</span>
+        <span class="p">{</span>
+            <span class="kt">string</span> <span class="n">spaces</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">' '</span><span class="p">,</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+            <span class="kt">string</span> <span class="n">stars</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="sc">'*'</span><span class="p">,</span> <span class="n">width</span> <span class="p">-</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Abs</span><span class="p">(</span><span class="n">i</span> <span class="p">*</span> <span class="m">2</span><span class="p">));</span>
+            <span class="n">diamond</span> <span class="p">+=</span> <span class="n">spaces</span> <span class="p">+</span> <span class="n">stars</span> <span class="p">+</span> <span class="n">spaces</span> <span class="p">+</span> <span class="s">"\n"</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">diamond</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">string</span> <span class="n">asterixDiamond</span> <span class="p">=</span> <span class="n">StringDiamond</span><span class="p">.</span><span class="nf">DrawDiamond</span><span class="p">(</span><span class="m">9</span><span class="p">);</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">asterixDiamond</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="challenge-3---vowel-counter">Challenge #3 - Vowel Counter</h2>
+
+<blockquote>
+  <p>Write a function that returns the number (count) of vowels in a given string. Letters considered as vowels are: a, i, e, o, and u. The function should be able to take all types of characters as input, including lower case letters, upper case letters, symbols, and numbers.</p>
+</blockquote>
+
+<p>The most obvious solution for this challenge would be to have a counter, loop through each character of the given string and increment the counter if character is a vowel. Thankfully, C# has a killer feature called <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/linq/">LINQ</a> (Language Integrated Query), which will make solution even simpler. I’ll present solution to you first and then we’ll discuss what it actually does.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">VowelCounter</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">int</span> <span class="nf">CountVowels</span><span class="p">(</span><span class="kt">string</span> <span class="n">text</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">char</span><span class="p">[]</span> <span class="n">vowels</span> <span class="p">=</span> <span class="p">{</span> <span class="sc">'a'</span><span class="p">,</span> <span class="sc">'e'</span><span class="p">,</span> <span class="sc">'i'</span><span class="p">,</span> <span class="sc">'o'</span><span class="p">,</span> <span class="sc">'u'</span> <span class="p">};</span>
+        <span class="k">return</span> <span class="n">text</span><span class="p">.</span><span class="nf">ToLower</span><span class="p">().</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">vowels</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="n">c</span><span class="p">)).</span><span class="nf">Count</span><span class="p">();</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">vowelCount</span> <span class="p">=</span> <span class="n">VowelCounter</span><span class="p">.</span><span class="nf">CountVowels</span><span class="p">(</span><span class="s">"I made my move. You make yours."</span><span class="p">);</span>
+        <span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="s">"Vowel count: {0}"</span><span class="p">,</span> <span class="n">vowelCount</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>First, we use <code class="language-plaintext highlighter-rouge">String.ToLower</code> to convert whole string to lowercase letters. After that, we filter out consonants by using <code class="language-plaintext highlighter-rouge">Enumerable.Where</code> method - we provide the array of vowels and check if it contains the current character. When filtering is finished, we use <code class="language-plaintext highlighter-rouge">Enumerable.Count</code> method to get the number of results.</p>
+
+<h2 id="challenge-4---checkbox-balancing">Challenge #4 - Checkbox Balancing</h2>
+
+<blockquote>
+  <p>You are given a small checkbook to balance that is given to you as a string. Sometimes, this checkbook will be cluttered by non-alphanumeric characters.</p>
+
+  <p>The first line shows the original balance. Each other (not blank) line gives information: check number, category, and check amount.</p>
+
+  <p>You need to clean the lines first, keeping only letters, digits, dots, and spaces. Next, return the report as a string. On each line of the report, you have to add the new balance. In the last two lines, return the total expenses and average expense. Round your results to two decimal places.</p>
+
+  <p><strong>Example Checkbook</strong></p>
+
+  <ul>
+    <li>1000.00</li>
+    <li>125 Market 125.45</li>
+    <li>126 Hardware 34.95</li>
+    <li>127 Video 7.45</li>
+    <li>128 Book 14.32</li>
+    <li>129 Gasoline 16.10</li>
+  </ul>
+
+  <p><strong>Example Solution</strong></p>
+
+  <ul>
+    <li>Original_Balance: 1000.00</li>
+    <li>125 Market 125.45 Balance 874.55</li>
+    <li>126 Hardware 34.95 Balance 839.60</li>
+    <li>127 Video 7.45 Balance 832.15</li>
+    <li>128 Book 14.32 Balance 817.83</li>
+    <li>129 Gasoline 16.10 Balance 801.73</li>
+    <li>Total expense 198.27</li>
+    <li>Average expense 39.65</li>
+  </ul>
+
+  <p><strong>Challenge Checkbook</strong></p>
+
+  <ul>
+    <li>1233.00</li>
+    <li>125 Hardware;! 24.8?;</li>
+    <li>123 Flowers 93.5</li>
+    <li>127 Meat 120.90</li>
+    <li>120 Picture 34.00</li>
+    <li>124 Gasoline 11.00</li>
+    <li>123 Photos;! 71.4?;</li>
+    <li>122 Picture 93.5</li>
+    <li>132 Tires;! 19.00,?;</li>
+    <li>129 Stamps 13.6</li>
+    <li>129 Fruits{} 17.6</li>
+    <li>129 Market;! 128.00?;</li>
+    <li>121 Gasoline;! 13.6?;</li>
+  </ul>
+</blockquote>
+
+<p>This was <em>somewhat</em> boring challenge because I spent more time thinking about structure of the code than the problem itself. Anyway, here is the list of things we need to do here:</p>
+
+<ul>
+  <li>Clean the whole text, leaving only letters, numbers, spaces, dots and new lines.</li>
+  <li>Take the line and try to parse it to <code class="language-plaintext highlighter-rouge">double</code>. It should succeed on the first try because the first line should have only the current balance.</li>
+  <li>If the previous step didn’t succeed, try to parse the line and take the check number, the category and the expense.</li>
+  <li>Form a new line with the data we gathered and add it to the string we’re gonna return at the end of the method and save the expense for later calculations.</li>
+  <li>If there are no expenses it means our checkbox had no data (or at least not valid data).</li>
+  <li>Calculate total and average expense and add them to the string which is returned at the end of the method.</li>
+</ul>
+
+<p>Let’s write a method for cleaning up the text first. We’ll use regular expression to keep only allowed characters (I’m pretty sure there is a shorter way to write this).</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="n">regex</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Regex</span><span class="p">(</span><span class="s">@"^[A-Za-z0-9. \n]$"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="n">checkbox</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">regex</span><span class="p">.</span><span class="nf">IsMatch</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="nf">ToString</span><span class="p">())).</span><span class="nf">ToArray</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Next, we will have to parse each checkbox line which has a check number, a category and an expense. For this purpose we will use <a href="https://docs.microsoft.com/en-us/dotnet/csharp/tuples">tuples</a>. We need to ensure that each line which violates this format won’t break our program, so we’ll wrap the parsing process in a <code class="language-plaintext highlighter-rouge">try...catch</code> block.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="p">(</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="kt">string</span> <span class="n">line</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">try</span>
+    <span class="p">{</span>
+        <span class="kt">string</span><span class="p">[]</span> <span class="n">fields</span> <span class="p">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">' '</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">checkNumber</span> <span class="p">=</span> <span class="kt">int</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">0</span><span class="p">]);</span>
+        <span class="kt">string</span> <span class="n">category</span> <span class="p">=</span> <span class="n">fields</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+        <span class="kt">double</span> <span class="n">expense</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">2</span><span class="p">]);</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="n">checkNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="n">expense</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">catch</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="k">null</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Finally, we need to ensure that the line we have parsed is valid:</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">ValidCheckboxLine</span><span class="p">((</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="n">tuple</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="kt">object</span><span class="p">[]</span> <span class="p">{</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span> <span class="p">}</span>
+                <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="k">value</span> <span class="p">=&gt;</span> <span class="k">value</span> <span class="p">==</span> <span class="k">null</span><span class="p">).</span><span class="nf">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we have everything we need to write the solution. We will use <code class="language-plaintext highlighter-rouge">List&lt;double&gt;</code> to store expenses and <code class="language-plaintext highlighter-rouge">Enumerable.Sum</code> and <code class="language-plaintext highlighter-rouge">Enumerable.Average</code> to calculate the total expense and the average expense.</p>
+
+<div class="language-cs highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Linq</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Text.RegularExpressions</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CheckboxBalancer</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">regex</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Regex</span><span class="p">(</span><span class="s">@"^[A-Za-z0-9. \n]$"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="p">(</span><span class="n">checkbox</span><span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">c</span> <span class="p">=&gt;</span> <span class="n">regex</span><span class="p">.</span><span class="nf">IsMatch</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="nf">ToString</span><span class="p">())).</span><span class="nf">ToArray</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="p">(</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="kt">string</span> <span class="n">line</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">try</span>
+        <span class="p">{</span>
+            <span class="kt">string</span><span class="p">[]</span> <span class="n">fields</span> <span class="p">=</span> <span class="n">line</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">' '</span><span class="p">);</span>
+            <span class="kt">int</span> <span class="n">checkNumber</span> <span class="p">=</span> <span class="kt">int</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">0</span><span class="p">]);</span>
+            <span class="kt">string</span> <span class="n">category</span> <span class="p">=</span> <span class="n">fields</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+            <span class="kt">double</span> <span class="n">expense</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="m">2</span><span class="p">]);</span>
+
+            <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="n">checkNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="n">expense</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Category</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="n">Expense</span><span class="p">:</span> <span class="k">null</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">ValidCheckboxLine</span><span class="p">((</span><span class="kt">int</span><span class="p">?</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="kt">string</span> <span class="n">Category</span><span class="p">,</span> <span class="kt">double</span><span class="p">?</span> <span class="n">Expense</span><span class="p">)</span> <span class="n">tuple</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="kt">object</span><span class="p">[]</span> <span class="p">{</span> <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span> <span class="p">}</span>
+                    <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="k">value</span> <span class="p">=&gt;</span> <span class="k">value</span> <span class="p">==</span> <span class="k">null</span><span class="p">).</span><span class="nf">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">BalanceCheckbox</span><span class="p">(</span><span class="kt">string</span> <span class="n">checkbox</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">double</span> <span class="n">balance</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+        <span class="kt">var</span> <span class="n">expenses</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">double</span><span class="p">&gt;();</span>
+        <span class="kt">string</span> <span class="n">cleanedUpCheckbox</span> <span class="p">=</span> <span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">CleanUpCheckbox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">);</span>
+        <span class="kt">string</span> <span class="n">balancedCheckbox</span> <span class="p">=</span> <span class="s">""</span><span class="p">;</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">line</span> <span class="k">in</span> <span class="n">cleanedUpCheckbox</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="sc">'\n'</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">try</span>
+            <span class="p">{</span>
+                <span class="n">balance</span> <span class="p">=</span> <span class="kt">double</span><span class="p">.</span><span class="nf">Parse</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+                <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Current balance: {0:F2}\n"</span><span class="p">,</span> <span class="n">balance</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">FormatException</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="kt">var</span> <span class="n">tuple</span> <span class="p">=</span> <span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">ParseCheckboxLine</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+                <span class="kt">var</span> <span class="p">(</span><span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">)</span> <span class="p">=</span> <span class="n">tuple</span><span class="p">;</span>
+
+                <span class="k">if</span> <span class="p">(!</span><span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">ValidCheckboxLine</span><span class="p">(</span><span class="n">tuple</span><span class="p">))</span>
+                <span class="p">{</span>
+                    <span class="k">continue</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="n">balance</span> <span class="p">-=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">Expense</span><span class="p">;</span>
+                <span class="n">expenses</span><span class="p">.</span><span class="nf">Add</span><span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="n">Expense</span><span class="p">);</span>
+                <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span>
+                    <span class="s">"{0} {1} {2:F2} Balance {3:F2}\n"</span><span class="p">,</span>
+                    <span class="n">CheckNumber</span><span class="p">,</span> <span class="n">Category</span><span class="p">,</span> <span class="n">Expense</span><span class="p">,</span> <span class="n">balance</span>
+                <span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">expenses</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="k">null</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Total expense: {0:F2}\n"</span><span class="p">,</span> <span class="n">expenses</span><span class="p">.</span><span class="nf">Sum</span><span class="p">());</span>
+        <span class="n">balancedCheckbox</span> <span class="p">+=</span> <span class="kt">string</span><span class="p">.</span><span class="nf">Format</span><span class="p">(</span><span class="s">"Average expense: {0:F2}\n"</span><span class="p">,</span> <span class="n">expenses</span><span class="p">.</span><span class="nf">Average</span><span class="p">());</span>
+
+        <span class="k">return</span> <span class="n">balancedCheckbox</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">checkbox</span> <span class="p">=</span> <span class="s">@"1233.00
+125 Hardware;! 24.8?;
+123 Flowers 93.5
+127 Meat 120.90
+120 Picture 34.00
+124 Gasoline 11.00
+123 Photos;! 71.4?;
+122 Picture 93.5
+132 Tires;! 19.00,?;
+129 Stamps 13.6
+129 Fruits{} 17.6
+129 Market;! 128.00?;
+121 Gasoline;! 13.6?;	
+"</span><span class="p">;</span>
+
+        <span class="n">Console</span><span class="p">.</span><span class="nf">Write</span><span class="p">(</span><span class="n">CheckboxBalancer</span><span class="p">.</span><span class="nf">BalanceCheckbox</span><span class="p">(</span><span class="n">checkbox</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="unit-tests">Unit tests</h2>
+
+<p>Remember I have said that I will write unit tests for each solution? You can find them on <a href="https://github.com/panther99/CodeChallenges">my GitHub repository</a>, along with the source code for each solution. Feel free to ask me any question or give your suggestion on solution improvement.</p>]]></content><author><name></name></author><category term="coding-challenges" /><category term="csharp" /><summary type="html"><![CDATA[What’s the better way to spend a part of the beautiful day than to do some code challenges? Long ago I saw the Daily Challenge series on dev.to where it’s staff would post a new problem each day. As I’m progressing with my transition towards .NET ecosystem, I thought this would be the great chance to polish my C# skills.]]></summary></entry><entry><title type="html">Organized Rails application with interactors and utilities</title><link href="https://nikolastojakovic.com/2020/01/02/organized-rails-application-with-interactors-and-utilities/" rel="alternate" type="text/html" title="Organized Rails application with interactors and utilities" /><published>2020-01-02T17:08:37+00:00</published><updated>2020-01-02T17:08:37+00:00</updated><id>https://nikolastojakovic.com/2020/01/02/organized-rails-application-with-interactors-and-utilities</id><content type="html" xml:base="https://nikolastojakovic.com/2020/01/02/organized-rails-application-with-interactors-and-utilities/"><![CDATA[<p>If you have ever used Rails, you know that there is no better thing for quick prototyping. It doesn’t matter how easy is your favorite framework for that. Rails will be dozens of times easier, especially giving the fact it is now a mature solution. That’s the biggest reason why so many startups have used it for building their applications.</p>
+
+<p>I’m not going to talk about Rails today. There are hundreds of articles which have explained it better than I ever could. What I’m going to talk about is the situation when your application becomes complex. If you have used Rails for a long time, you will definitely know what I’m talking about. You just know the feeling when that point comes.</p>
+
+<p>Rubocop yells at you. Your significant other yells at you. Your dog yells at you. Suddenly, the whole world is against you. You’re trying to keep controllers lean but you end up with fat models. Ruby doesn’t seem so shiny anymore. You know where the problem lies, but you don’t know where to start. Beside having cats instead of dogs, I was in exactly the same situation recently.</p>
+
+<h2 id="what-happened">What happened?</h2>
+
+<p>At that time, I was trying to solve the problem of fat controllers by introducing services. Our logic was more complex than in the example illustrated here, but you’ll get the point:</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Services</span>
+  <span class="k">class</span> <span class="nc">UserService</span>
+    <span class="kp">extend</span> <span class="nb">self</span>
+
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+      <span class="no">User</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Which would be called in a controller:</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">BaseController</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="o">::</span><span class="no">Services</span><span class="o">::</span><span class="no">UserService</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The problem emerged when services became too general. For example, instead of creating separate services for handling user creation, update and deleting, I have put everything in <code class="language-plaintext highlighter-rouge">UserService</code>. I managed to keep my controllers and models lean. But now I ended up with fat services.</p>
+
+<p>Now you may ask why I just didn’t split them? Well, in fact I was thinking about that. Unfortunately, we had some issues shortly after this. They weren’t related to the problem discussed in this article, but they required from us to start from the scratch. Starting from the scratch is generally not recommended (and for the right reason), but in this case it gave us the chance to put things in place.</p>
+
+<h2 id="interactors-and-utilities-to-the-rescue">Interactors and utilities to the rescue</h2>
+
+<p>Before we started working on a new version of the application, colleague introduced me to the idea of interactors and utilities. Interactors are basically just an abstraction over some small part of the application’s business logic. Simply said, they’re single purpose objects. If you’re familiar with design patterns, you probably already know it as the <a href="https://en.wikipedia.org/wiki/Command_pattern">Command pattern</a>.</p>
+
+<p>There are few approaches you can use for organizing your code base with interactors. You can use a <a href="https://github.com/collectiveidea/interactor">gem</a> or you can implement them on your own. We chose to do the latter, as our use case was quite simple. Let’s see how it looks on an example of creating a user.</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Users</span>
+  <span class="k">module</span> <span class="nn">Interactors</span>
+    <span class="k">module</span> <span class="nn">Create</span>
+      <span class="kp">module_function</span>
+
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="o">::</span><span class="no">Users</span><span class="o">::</span><span class="no">Utils</span><span class="o">::</span><span class="no">Create</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And that’s it. You now have an interactor which calls a utility with the same name. What the heck is utility now and where is all the logic? Well, I lied a bit. Interactor won’t do anything on it’s own. It will rather serve as a <em>middleman</em> between controller and utilities. Together, utilities are going to do the process of creating new user. After all, this process can have many parts – sanitizing parameters, authentication, sending e-mail and so on.</p>
+
+<p>Let’s see how utilities for the interactor above could look like.</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Users</span>
+  <span class="k">module</span> <span class="nn">Utils</span>
+    <span class="k">module</span> <span class="nn">Create</span>
+      <span class="kp">module_function</span>
+
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">user_params</span> <span class="o">=</span> <span class="o">::</span><span class="no">Users</span><span class="o">::</span><span class="no">Utils</span><span class="o">::</span><span class="no">SanitizeParams</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="n">user_params</span><span class="p">)</span>
+
+        <span class="o">::</span><span class="no">Users</span><span class="o">::</span><span class="no">Utils</span><span class="o">::</span><span class="no">AuthenticateUser</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="o">::</span><span class="no">Users</span><span class="o">::</span><span class="no">Utils</span><span class="o">::</span><span class="no">SendWelcomeEmail</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Users</span>
+  <span class="k">module</span> <span class="nn">Utils</span>
+    <span class="k">module</span> <span class="nn">SanitizeParams</span>
+      <span class="kp">module_function</span>
+
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:user</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span>
+          <span class="ss">:username</span><span class="p">,</span> <span class="ss">:password</span><span class="p">,</span> <span class="ss">:email</span>
+        <span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Users</span>
+  <span class="k">module</span> <span class="nn">Utils</span>
+    <span class="k">module</span> <span class="nn">AuthenticateUser</span>
+      <span class="kp">module_function</span>
+
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="n">session</span><span class="p">[</span><span class="ss">:user_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="p">.</span><span class="nf">id</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Users</span>
+  <span class="k">module</span> <span class="nn">Utils</span>
+    <span class="k">module</span> <span class="nn">SendWelcomeEmail</span>
+      <span class="kp">module_function</span>
+
+      <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+        <span class="no">UserMailer</span><span class="p">.</span><span class="nf">with</span><span class="p">(</span><span class="ss">user: </span><span class="n">user</span><span class="p">).</span><span class="nf">welcome_email</span><span class="p">.</span><span class="nf">deliver_later</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>In the end, you will just have to call interactor from the controller.</p>
+
+<div class="language-rb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">BaseController</span>
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="o">::</span><span class="no">Users</span><span class="o">::</span><span class="no">Interactors</span><span class="o">::</span><span class="no">Create</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This has multiple advantages:</p>
+
+<ul>
+  <li>it will ensure that each part does only one thing</li>
+  <li>you’ll be able to add more features later easier</li>
+  <li>it will help you to keep your models and controllers lean</li>
+  <li>you won’t have to use <code class="language-plaintext highlighter-rouge">concerns</code> directories</li>
+</ul>
+
+<h2 id="okay-where-should-i-put-all-these-files">Okay, where should I put all these files?</h2>
+
+<p>Wherever you want, but if you ask me, you should put them in <code class="language-plaintext highlighter-rouge">app/lib</code>. This way Rails will automatically require them. Here is the directory structure for the example above:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app/
+  lib/
+    users/
+      interactors/
+        create.rb
+      utils/
+        create.rb
+        sanitize_params.rb
+        authenticate_user.rb
+        send_welcome_email.rb
+</code></pre></div></div>
+
+<h2 id="learn-more">Learn more</h2>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=WpkDN78P884">Keynote: Architecture The Lost Years by Robert Martin</a></li>
+  <li><a href="https://sourcemaking.com/design_patterns/command">Command Design Pattern</a></li>
+</ul>]]></content><author><name></name></author><category term="software-development" /><category term="ruby" /><category term="rails" /><category term="code-quality" /><category term="software-design" /><summary type="html"><![CDATA[If you have ever used Rails, you know that there is no better thing for quick prototyping. It doesn’t matter how easy is your favorite framework for that. Rails will be dozens of times easier, especially giving the fact it is now a mature solution. That’s the biggest reason why so many startups have used it for building their applications.]]></summary></entry></feed>

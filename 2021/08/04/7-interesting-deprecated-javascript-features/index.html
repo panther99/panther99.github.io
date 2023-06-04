@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>7 interesting deprecated JavaScript features | Nikola Stojaković</title>
+<meta name="generator" content="Jekyll v4.3.2" />
+<meta property="og:title" content="7 interesting deprecated JavaScript features" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged." />
+<meta property="og:description" content="Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged." />
+<link rel="canonical" href="https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/" />
+<meta property="og:url" content="https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/" />
+<meta property="og:site_name" content="Nikola Stojaković" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-08-04T15:29:55+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="7 interesting deprecated JavaScript features" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2021-08-04T15:29:55+00:00","datePublished":"2021-08-04T15:29:55+00:00","description":"Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged.","headline":"7 interesting deprecated JavaScript features","mainEntityOfPage":{"@type":"WebPage","@id":"https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/"},"url":"https://nikolastojakovic.com/2021/08/04/7-interesting-deprecated-javascript-features/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css">
+    <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet"><link type="application/atom+xml" rel="alternate" href="https://nikolastojakovic.com/feed.xml" title="Nikola Stojaković" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/">Nikola Stojaković</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About me</a></div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">7 interesting deprecated JavaScript features</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-08-04T15:29:55+00:00" itemprop="datePublished">Aug 4, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Since it’s birth 26 years ago at Netscape, JavaScript has come a long way. A language which was used only to interact with Java applets and do simple DOM manipulation is now used for writing back-ends and desktop and mobile applications too. Ecosystem grew by a big margin as well as the community. Just like every other language, JavaScript had (and still has) rough edges and quirks. We’re stuck with some of them because of the backward compatibility. Some are, (un)fortunately, mostly or completely gone. Some of these can still be used but it’s highly discouraged.</p>
+
+<h2 id="objectprototypewatch-and-objectprototypeunwatch-methods">
+<code class="language-plaintext highlighter-rouge">Object.prototype.watch</code> and <code class="language-plaintext highlighter-rouge">Object.prototype.unwatch</code> methods</h2>
+
+<p>Unce upon a time there was an easy way to watch for the property changes on an object.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">cat</span><span class="p">.</span><span class="nf">watch</span><span class="p">(</span><span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">,</span> <span class="nf">function </span><span class="p">(</span><span class="nx">propertyName</span><span class="p">,</span> <span class="nx">previousValue</span><span class="p">,</span> <span class="nx">newValue</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">"</span><span class="s2">Mr. </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">newValue</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Mr. Oswald!</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nf">unwatch</span><span class="p">(</span><span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Luna!</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Nowadays you can use <code class="language-plaintext highlighter-rouge">Proxy</code> for this purpose.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">set</span><span class="p">:</span> <span class="p">(</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nf">if </span><span class="p">(</span><span class="nx">prop</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">obj</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="s2">`Mr. </span><span class="p">${</span><span class="nx">value</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">let</span> <span class="nx">cat</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Proxy</span><span class="p">({},</span> <span class="nx">handler</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Mr. Oswald!</span>
+
+<span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span> <span class="p">...</span><span class="nx">cat</span> <span class="p">};</span> <span class="c1">// this will remove behavior imposed by Proxy</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">!</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Hello Luna!</span>
+
+</code></pre></div></div>
+
+<h2 id="with-statement">
+<code class="language-plaintext highlighter-rouge">with</code> statement</h2>
+
+<p>We all know how horrible working with long chain of properties can be. Fortunately, there is a way around it. Unfortunately – you shouldn’t use it.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">details</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">passport</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">location</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">city</span><span class="p">:</span> <span class="dl">'</span><span class="s1">New York</span><span class="dl">'</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nf">with </span><span class="p">(</span><span class="nx">cat</span><span class="p">.</span><span class="nx">details</span><span class="p">.</span><span class="nx">passport</span><span class="p">.</span><span class="nx">location</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">city</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Meowyork</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>There are two reasons why you shouldn’t use <code class="language-plaintext highlighter-rouge">with</code> statement.</p>
+
+<ul>
+  <li>There is no place for optimization inside it, since you can’t predict if variable will refer to a property or to an outside variable.</li>
+  <li>It violates lexical scope, making program analysis very hard or even infeasible.</li>
+</ul>
+
+<p>Also, it will be impossible for you to use it in ES6+ (or ES5 with the strict mode turned on). Strict mode prohibits it’s usage.</p>
+
+<p><strong>Alternative</strong></p>
+
+<p>The best you can do is to declare a variable which will hold the chain of properties instead.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">details</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">passport</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">location</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">city</span><span class="p">:</span> <span class="dl">'</span><span class="s1">New York</span><span class="dl">'</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">catLocation</span> <span class="o">=</span> <span class="nx">cat</span><span class="p">.</span><span class="nx">details</span><span class="p">.</span><span class="nx">passport</span><span class="p">.</span><span class="nx">location</span><span class="p">;</span>
+<span class="nx">catLocation</span><span class="p">.</span><span class="nx">city</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Meowyork</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="expression-closures">Expression closures</h2>
+
+<p>Long before arrow functions were even in a plan, there were expression closures. They allowed you to omit curly braces and return statements from the method definitions completely.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">food</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>This has been removed in favor of using standard ES syntax.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">food</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Nowadays you can also use arrow functions and method definitions (both introduced in ES6).</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">favorites</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="kd">get</span> <span class="nf">food</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="dl">"</span><span class="s2">Tuna</span><span class="dl">"</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h2 id="objectobserve-and-objectunobserve-methods">
+<code class="language-plaintext highlighter-rouge">Object.observe</code> and <code class="language-plaintext highlighter-rouge">Object.unobserve</code> methods</h2>
+
+<p>Back in the days there was also an easy way of getting an information about any changes to an object.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span>
+<span class="p">};</span>
+
+<span class="nb">Object</span><span class="p">.</span><span class="nf">observe</span><span class="p">(</span><span class="nx">cat</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">changes</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">changes</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="c1">// [{ name: 'name', object: &lt;obj&gt;, type: 'update', oldValue: 'Oswald' }]</span>
+
+<span class="nb">Object</span><span class="p">.</span><span class="nf">unobserve</span><span class="p">(</span><span class="nx">cat</span><span class="p">);</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Max</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>There were the similar methods for arrays too – <code class="language-plaintext highlighter-rouge">Array.observe</code> and <code class="language-plaintext highlighter-rouge">Array.unobserve</code>.</p>
+
+<p><strong>Alternative</strong></p>
+
+<p>You can do this with <code class="language-plaintext highlighter-rouge">Proxy</code> too.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cat</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Proxy</span><span class="p">({</span> <span class="na">name</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span> <span class="p">},</span> <span class="p">{</span>
+  <span class="na">get</span><span class="p">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">get</span><span class="dl">"</span><span class="p">,</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nb">Reflect</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">);</span>
+  <span class="p">},</span>
+  <span class="na">set</span><span class="p">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">set</span><span class="dl">"</span><span class="p">,</span> <span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span> <span class="p">});</span>
+    <span class="k">return</span> <span class="nb">Reflect</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="nx">target</span><span class="p">,</span> <span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">;</span>
+<span class="c1">// { type: 'set', target: &lt;obj&gt;, prop: 'name', value: 'Luna' }</span>
+
+<span class="nx">cat</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+<span class="c1">// { type: 'get', target: &lt;obj&gt;, prop: 'name' }</span>
+</code></pre></div></div>
+
+<h2 id="let-expressions-and-let-blocks">
+<code class="language-plaintext highlighter-rouge">let</code> expressions and <code class="language-plaintext highlighter-rouge">let</code> blocks</h2>
+
+<p>In ES6, two statements for declaring block-scoped variables have been introduced; <code class="language-plaintext highlighter-rouge">let</code> and <code class="language-plaintext highlighter-rouge">const</code>. For the brief period of time, there were non-standard extensions to the let statement. These were <code class="language-plaintext highlighter-rouge">let</code> expressions and <code class="language-plaintext highlighter-rouge">let</code> blocks.</p>
+
+<p><code class="language-plaintext highlighter-rouge">let</code> blocks provided a way to instantiate a block where variables can have different values, without affecting the same-named ones outside of that block.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">;</span>
+
+<span class="nf">let </span><span class="p">(</span><span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Luna (2 years old)</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Oswald (2.5 years old)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">let</code> expressions did the similar thing but on the expression level.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="nf">let</span><span class="p">(</span><span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">)</span> <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span><span class="p">);</span> <span class="c1">// Oswald</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span><span class="p">);</span> <span class="c1">// Luna</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Since <code class="language-plaintext highlighter-rouge">let</code> is block scoped you can just declare variables again inside inner scope and change them there.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">;</span>
+
+<span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">catName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="nx">catAge</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Luna (2 years old)</span>
+<span class="p">}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="nx">catName</span> <span class="o">+</span> <span class="dl">"</span><span class="s2">(</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">catAge</span> <span class="o">+</span> <span class="dl">"</span><span class="s2"> years old)</span><span class="dl">"</span><span class="p">);</span> <span class="c1">// Oswald (2.5 years old)</span>
+</code></pre></div></div>
+
+<h2 id="html-wrapper-methods-on-strings">HTML wrapper methods on strings</h2>
+
+<p>They are basically bunch of methods which wrapped your string with tags like <code class="language-plaintext highlighter-rouge">bold</code>, <code class="language-plaintext highlighter-rouge">blink</code>, <code class="language-plaintext highlighter-rouge">font</code>, <code class="language-plaintext highlighter-rouge">small</code>, <code class="language-plaintext highlighter-rouge">big</code>, <code class="language-plaintext highlighter-rouge">i</code> etc.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">Some teeny-tiny text</span><span class="dl">"</span><span class="p">.</span><span class="nf">fontsize</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>    <span class="c1">// &lt;font size="3"&gt;Some teeny-tiny text.&lt;/font&gt;</span>
+<span class="dl">"</span><span class="s2">Some tiny text.</span><span class="dl">"</span><span class="p">.</span><span class="nf">small</span><span class="p">();</span>             <span class="c1">// &lt;small&gt;Some tiny text.&lt;/small&gt;</span>
+<span class="dl">"</span><span class="s2">Some yuuuge text.</span><span class="dl">"</span><span class="p">.</span><span class="nf">big</span><span class="p">();</span>             <span class="c1">// &lt;big&gt;Some yuuge text.&lt;/big&gt;</span>
+<span class="dl">"</span><span class="s2">Talk to the hand!</span><span class="dl">"</span><span class="p">.</span><span class="nf">bold</span><span class="p">();</span>            <span class="c1">// &lt;b&gt;Talk to the hand!&lt;/b&gt;</span>
+<span class="dl">"</span><span class="s2">You have been terminated.</span><span class="dl">"</span><span class="p">.</span><span class="nf">blink</span><span class="p">();</span>   <span class="c1">// &lt;blink&gt;You have been terminated.&lt;/blink&gt;</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>There are no alternatives for this monstrosity.</p>
+
+<h2 id="parallelarray"><code class="language-plaintext highlighter-rouge">ParallelArray</code></h2>
+
+<p>This one was an experimental feature introduced by Mozilla in the Firefox (specifically, version 17 of the Gecko engine). It’s purpose was to enable data-parallelism by executing multiple functions in parallel. If it wasn’t possible, they would be executed in the sequential order.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">cats</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ParallelArray</span><span class="p">([</span><span class="dl">"</span><span class="s2">Oswald</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">Luna</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">Max</span><span class="dl">"</span><span class="p">]);</span>
+<span class="nx">cats</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="dl">"</span><span class="s2">😸 </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">cat</span><span class="p">;</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p><strong>Alternative</strong></p>
+
+<p>Today you can use <code class="language-plaintext highlighter-rouge">Promise.all</code> to accomplish this.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>It’s fantastic to see how much JavaScript has progressed for the last 26 years. Who could’ve thought that language made in 10 days can become one of the most dominant in the industry? I believe it’s a good practice to take a step back and see how things worked in the past. That can teach us not to repeat the same mistakes anymore. It can also make us more grateful for the things we have today. Even though I have a fair share of criticism for JavaScript, I can’t wait to see what’s coming in the next two decades.</p>
+
+  </div>
+<a class="u-url" href="/2021/08/04/7-interesting-deprecated-javascript-features/" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+    <data class="u-url" href="/%20/"></data>
+
+    <div class="wrapper">
+
+        <h2 class="footer-heading">Nikola Stojaković</h2>
+
+        <div class="footer-col-wrapper">
+            <div class="footer-col footer-col-1">
+                <ul class="contact-list">
+                    <li class="p-name">
+                        
+<div class="social-media">
+    
+    
+        
+        
+            <a href="https://linkedin.com/in/nikolastojakovic" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="lni lni-linkedin-original"></i></a>
+        
+    
+        
+        
+            <a href="https://github.com/panther99" title="GitHub" target="_blank" rel="noopener noreferrer"><i class="lni lni-github-original"></i></a>
+        
+    
+        
+        
+            <a href="https://dev.to/stojakovic99" title="Dev.to" target="_blank" rel="noopener noreferrer"><i class="lni lni-dev"></i></a>
+        
+    
+</div>
+
+
+                    </li>
+</ul>
+            </div>
+
+            <div class="footer-col footer-col-2">
+<ul class="social-media-list"><li><a href="https://github.com/panther99" target="_blank" rel="noopener noreferrer"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">panther99</span></a></li></ul>
+</div>
+
+            <div class="footer-col footer-col-3">
+                <p>Just another software developer ranting about software (mostly).</p>
+            </div>
+        </div>
+
+    </div>
+
+</footer>
+</body>
+
+</html>
