@@ -27,9 +27,9 @@ npm run script generate migration <migration_name>
 
     ```json
     {
-    "scripts": {
+      "scripts": {
         "script": "./src/scripts/entry.sh" // our NPM script
-    },
+      },
     }
     ```
 
@@ -43,9 +43,9 @@ npm run script generate migration <migration_name>
     const [first, second, ...rest] = usefulArguments;
 
     if (['g', 'generate'].includes(first)) {
-    if (second === 'migration') {
+      if (second === 'migration') {
         createMigration(...rest);
-    }
+      }
     }
     ```
 
@@ -72,8 +72,8 @@ If you've been concerned about the `.js` extension because your project is using
     const matchPath = tsConfigPaths.createMatchPath(absoluteBaseUrl, paths);
 
     export function resolve(specifier, ctx, defaultResolve) {
-    const match = matchPath(specifier);
-    return match
+      const match = matchPath(specifier);
+      return match
         ? resolveTs(pathToFileURL(`${match}`).href, ctx, defaultResolve)
         : resolveTs(specifier, ctx, defaultResolve);
     }
@@ -85,9 +85,9 @@ If you've been concerned about the `.js` extension because your project is using
 
     ```json
     {
-    "scripts": {
+      "scripts": {
         "script": "./src/scripts/entry.sh ./scriptsLoader.js"
-    }
+      }
     }
     ```
 
