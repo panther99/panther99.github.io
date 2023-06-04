@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Add custom scripts in a Node project"
-date: 2023-06-10 19:22:00 +0200
+date: 2023-06-04 19:22:00 +0200
 tags: javascript node.js development-experience automation
 categories: software-development
 ---
